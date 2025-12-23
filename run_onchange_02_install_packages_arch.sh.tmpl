@@ -47,11 +47,17 @@ gui_pkgs=(
   google-chrome
 )
 
+tui_pkgs=(
+  yazi
+)
+
 {{ if eq .os "arch-linux" -}}
 
 install_yay_packages "CLI Tools" "${pkgs[@]}"
+install_yay_packages "TUI Applications" "${tui_pkgs[@]}"
 
 {{ if not .headless -}}
+
 install_yay_packages "GUI Applications" "${gui_pkgs[@]}"
 
 {{- end }}
