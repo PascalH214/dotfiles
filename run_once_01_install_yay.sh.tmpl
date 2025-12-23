@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Only execute on Arch Linux
+{{ if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "arch")) -}}
+
+# Define colors
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+ensure_yay() {
+    if command -v yay >/dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} yay is already installed."
+    else
+        echo -e "${CYAN}..${NC} yay not found. Starting installation..."
+        
+        # Install base dependencies via pacman
+        sudo pacman -S --needed --noconfirm base-devel git
+        
+        # Create a temp directory and ensure it is removed even if the script fails
+        local temp_dir=$(mktemp -d)
+        trap "rm -rf $temp_dir" EXIT
+        
+        echo -e "${CYAN}..${NC} Cloning yay from AUR..."
+        git clone https://aur.archlinux.org/yay.git "$temp_dir"
+        
+        pushd "$temp_dir" >/dev/null
+        # Build and install (makepkg will prompt for sudo internally for the install step)
+        if makepkg -si --noconfirm; then
+            echo -e "${GREEN}✓${NC} yay installed successfully."
+        else
+            echo -e "${RED}✗${NC} Failed to install yay."
+            exit 1
+        fi
+        popd >/dev/null
+    fi
+}
+
+ensure_yay
+
+{{- end }}

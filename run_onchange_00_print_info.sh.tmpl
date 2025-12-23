@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+echo -e "${GREEN}OS:${NC} {{ .os }}"
+
+echo -n "Do you want to continue? [y/N] "
+read -r response
+
+if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    echo -e "${RED}Installation aborted by user.${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Proceeding...${NC}"

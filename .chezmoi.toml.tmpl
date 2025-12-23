@@ -1,0 +1,6 @@
+{{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
+{{- $headless := promptBoolOnce . "headless" "Is your system headless?" true }}
+
+[data]
+  headless = {{ $headless | quote }}
+  os = {{ $os | quote }}
