@@ -1,7 +1,5 @@
 #!/bin/bash
 
-{{ if (and (hasKey .chezmoi.osRelease "id") (eq .chezmoi.osRelease.id "arch")) -}}
-
 # Define colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -39,22 +37,23 @@ install_yay_packages() {
   echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
 }
 
-# --- Execution ---
-
-# 1. CLI Tools
 pkgs=(
   fastfetch
   bat
 )
-install_yay_packages "CLI Tools" "${pkgs[@]}"
 
-# 2. GUI Applications (Conditional)
-{{ if not .headless -}}
 gui_pkgs=(
   visual-studio-code-bin
   google-chrome
 )
+
+{{ if eq .os "arch-linux" -}}
+
+install_yay_packages "CLI Tools" "${pkgs[@]}"
+
+{{ if not .headless -}}
 install_yay_packages "GUI Applications" "${gui_pkgs[@]}"
+
 {{- end }}
 
 {{ end -}}
