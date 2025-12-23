@@ -1,0 +1,13 @@
+[opener]
+play = [{ run = 'vlc "$@"', orphan = true, for = 'unix' }]
+edit = [{ run = 'nvim "$@"', block = true, for = 'unix' }]
+mount_container = [{ run = 'veracrypt "$@" /run/media/veracrypt_container/', orphan = true}]
+view_pdf  = [{ run = 'okular "$@"', orphan = true}]
+
+[open]
+rules = [
+  { mime = "video/*", use = "play" },
+  { name = "*.txt", use = "edit" },
+  { name = "*.hc", use = "mount_container" },
+  { name = "*.pdf", use = "view_pdf" },
+]
