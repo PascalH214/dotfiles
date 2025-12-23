@@ -37,8 +37,9 @@ install_yay_packages() {
   echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
 }
 
-pkgs=(
+cli_pkgs=(
   fastfetch
+  starship
   bat
 )
 
@@ -53,7 +54,7 @@ tui_pkgs=(
 
 {{ if eq .os "arch-linux" -}}
 
-install_yay_packages "CLI Tools" "${pkgs[@]}"
+install_yay_packages "CLI Tools" "${cli_pkgs[@]}"
 install_yay_packages "TUI Applications" "${tui_pkgs[@]}"
 
 {{ if not .headless -}}
