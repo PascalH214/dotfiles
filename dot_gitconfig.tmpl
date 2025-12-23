@@ -1,0 +1,15 @@
+[user]
+	email = {{ .email }}
+	name = {{ .git_username }}
+
+[core]
+	editor = nvim
+
+[init]
+	defaultBranch = main
+
+[merge]
+	tool = nvim -d
+
+[pull]
+	rebase = false

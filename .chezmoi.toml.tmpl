@@ -1,6 +1,13 @@
 {{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true }}
 
+{{- $email := promptStringOnce . "email" "What is your email?" }}
+{{- $git_username := promptStringOnce . "git username" "What should your git username be?" }}
+
 [data]
   headless = {{ $headless }}
   os = {{ $os | quote }}
+
+  email = {{ $email | quote }}
+
+  git_username = {{ $git_username | quote }}
