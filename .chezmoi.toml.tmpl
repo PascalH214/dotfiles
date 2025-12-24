@@ -1,13 +1,22 @@
+{{- $email := promptStringOnce . "email" "What is your email?" -}}
+{{- $git_username := promptStringOnce . "git_username" "What should your git username be?" -}}
 {{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
-{{- $headless := promptBoolOnce . "headless" "Is your system headless?" true }}
+{{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
 
-{{- $email := promptStringOnce . "email" "What is your email?" }}
-{{- $git_username := promptStringOnce . "git username" "What should your git username be?" }}
+{{- $install_hyprland := false -}}
+{{- if not $headless -}}
+  {{- $install_hyprland = promptBoolOnce . "install_hyprland" "Do you want to install hyprland and related things?" false -}}
+{{- end -}}
 
 [data]
-  headless = {{ $headless }}
-  os = {{ $os | quote }}
+email = {{ $email | quote }}
+git_username = {{ $git_username | quote }}
+os = {{ $os | quote }}
+headless = {{ $headless }}
 
-  email = {{ $email | quote }}
+{{- if not $headless }}
+install_hyprland = {{ $install_hyprland }}
+{{- else }}
+install_hyprland = false
+{{- end }}
 
-  git_username = {{ $git_username | quote }}

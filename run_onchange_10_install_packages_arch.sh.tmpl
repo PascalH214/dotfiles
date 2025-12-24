@@ -44,14 +44,18 @@ cli_pkgs=(
   bat
 )
 
+tui_pkgs=(
+  yazi
+  neovim
+)
+
 gui_pkgs=(
   visual-studio-code-bin
   google-chrome
 )
 
-tui_pkgs=(
-  yazi
-  neovim
+hyprland_pkgs=(
+  hyprland
 )
 
 {{ if eq .os "arch-linux" -}}
@@ -62,6 +66,12 @@ install_yay_packages "TUI Applications" "${tui_pkgs[@]}"
 {{ if not .headless -}}
 
 install_yay_packages "GUI Applications" "${gui_pkgs[@]}"
+
+{{- end }}
+
+{{ if .install_hyprland -}}
+
+install_yay_packages "Hyprland and related" "${hyprland_pkgs[@]}"
 
 {{- end }}
 
