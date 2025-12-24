@@ -8,7 +8,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 print_begin() {
-  local label="$0"
+  local label="$1"
 
   echo -e "${BLUE}======================================${NC}"
   # Using the dynamic label here
@@ -22,3 +22,13 @@ print_begin() {
 print_end() {
   echo -e "\n${GREEN}✓ Configure ${label} finished${NC}\n"
 }
+
+{{- if .install_ly }}
+
+print_begin "ly (display-manager)"
+
+sudo systemctl enable ly@tty2.service
+
+print_end "ly (display-manager)"
+
+{{- end }}

@@ -47,6 +47,9 @@ cli_pkgs=(
 tui_pkgs=(
   yazi
   neovim
+{{- if .install_ly }}
+  ly
+{{- end }}
 )
 
 gui_pkgs=(
@@ -57,6 +60,7 @@ gui_pkgs=(
 hyprland_pkgs=(
   hyprland
   hyprlock
+  kitty
   ttf-0xproto-nerd
 )
 

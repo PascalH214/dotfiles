@@ -3,20 +3,18 @@
 {{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
 
-{{- $install_hyprland := false -}}
-{{- if not $headless -}}
-  {{- $install_hyprland = promptBoolOnce . "install_hyprland" "Do you want to install hyprland and related things?" false -}}
-{{- end -}}
+{{- $install_hyprland := and (not $headless)
+      (promptBoolOnce . "install_hyprland" "Do you want to install hyprland and related things?" true)
+-}}
+
+{{- $install_ly := and (not $headless)
+      (promptBoolOnce . "install_ly" "Do you want to install ly (display-manager)?" true)
+-}}
 
 [data]
 email = {{ $email | quote }}
 git_username = {{ $git_username | quote }}
 os = {{ $os | quote }}
 headless = {{ $headless }}
-
-{{- if not $headless }}
 install_hyprland = {{ $install_hyprland }}
-{{- else }}
-install_hyprland = false
-{{- end }}
-
+install_ly = {{ $install_ly }}
