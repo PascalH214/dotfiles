@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+print_begin() {
+  local label="$0"
+
+  echo -e "${BLUE}======================================${NC}"
+  # Using the dynamic label here
+  echo -e "${BOLD}Configure ${label}:${NC}"
+  for pkg in "${pkgs[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo -e "${BLUE}======================================${NC}\n"
+}
+
+print_end() {
+  echo -e "\n${GREEN}✓ Configure ${label} finished${NC}\n"
+}
