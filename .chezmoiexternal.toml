@@ -1,0 +1,29 @@
+[".config/tmux/manual-managed-plugins/tmux-autoreload"]
+  type          = "git-repo"
+  url           = "https://github.com/b0o/tmux-autoreload.git"
+  refreshPeriod = "24h"
+
+[".config/tmux/plugins/tpm"]
+  type          = "git-repo"
+  url           = "https://github.com/tmux-plugins/tpm"
+  refreshPeriod = "24h"
+
+[".config/tmux/plugins/tmux.nvim"]
+  type          = "git-repo"
+  url           = "https://github.com/aserowy/tmux.nvim"
+  refreshPeriod = "24h"
+
+[".config/tmux/plugins/tmux-sensible"]
+  type          = "git-repo"
+  url           = "https://github.com/tmux-plugins/tmux-sensible"
+  refreshPeriod = "24h"
+
+[".config/tmux/plugins/tmux-better-mouse-mode"]
+  type          = "git-repo"
+  url           = "https://github.com/NHDaly/tmux-better-mouse-mode"
+  refreshPeriod = "24h"
+
+[".config/tmux/plugins/tmux"]
+  type          = "git-repo"
+  url           = "https://github.com/catppuccin/tmux"
+  refreshPeriod = "24h"
