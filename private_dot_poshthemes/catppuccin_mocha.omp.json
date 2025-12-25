@@ -66,5 +66,8 @@
     }
   ],
   "final_space": true,
+  "transient": {
+    "template": "❯ "
+  },
   "version": 4
 }
