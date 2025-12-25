@@ -32,171 +32,43 @@ install_yay_packages() {
   done
   echo -e "${BLUE}======================================${NC}\n"
 
-  yay -S --needed --noconfirm "${pkgs[@]}"
+  # We don't use --noconfirm because some packages could be from AUR
+  # and require manual intervention (e.g. reading the PKGBUILD).
+  yay -S --needed "${pkgs[@]}"
 
   echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
 }
 
-cli_pkgs=(
-  kitty
-  fastfetch
-  starship
-
-  git
-
-  man-db
-  man-pages
-
-  less
-
-  zoxide
-  fd
-  ripgrep
-
-  bat
-
-  7zip
-  rar
-  zip
-  unzip
-
-  rsync
-  rclone
-
-  translate-shell
-)
-
-tui_pkgs=(
-  yazi
-  neovim
-  tmux
-  tmuxinator
-  bluetui
-  fzf
-  impala
-  ncpamixer
-  tree
-{{- if .install_ly }}
-  ly
-{{- end }}
-)
-
-development_tools_pkgs=(
-  docker
-  docker-compose
-  maven
-  npm
-  terraform 
-)
-
-gui_pkgs=(
-  visual-studio-code-bin
-  google-chrome
-  bitwarden
-  discord
-  libreoffice-still
-  thunderbird
-  veracrypt 
-)
-
-font_pkgs=(
-  ttf-0xproto-nerd
-  ttf-jetbrains-mono-nerd
-  noto-fonts-emoji
-)
-
-hyprland_pkgs=(
-  hyprland
-  hyprlock
-  hyprshot
-
-  rofi
-  waybar
-  wpaperd
-
-  kitty
-  dunst
-  rose-pine-gtk-theme-full
-
-  bluez
-  bluez-utils
-
-  brightnessctl
-
-  pipewire
-  pipewire-pulse
-
-  wireplumber
-)
-
-kde_pkgs=(
-  qt5ct
-  qt6ct-kde
-  archlinux-xdg-menu
-  xdg-desktop-portal-hyprland
-  dolphin
-  ark
-  okular
-  kdialog
-  kcalc
-  keditfiletype
-)
-
-media_pkgs=(
-  feishin-bin
-  ffmpeg
-  ffmpegthumbnailer
-  tumbler 
-  vlc
-  vlc-plugins-all
-)
-
-timeshift_pkgs=(
-  timeshift
-  grub-btrfs
-  timeshift-autosnap 
-)
-
-other_tools_pkgs=(
-  # printer
-{{ if not .headless -}}
-  naps2
-  system-config-printer
-  cups
-
-  selectdefaultapplication
-{{- end }}
-)
+# The entire installation logic is now driven by the data
+# in .chezmoi.toml.tmpl. This script only defines *how* to install.
 
 {{ if eq .os "arch-linux" -}}
 
-
-install_yay_packages "CLI Tools" "${cli_pkgs[@]}"
-install_yay_packages "TUI Applications" "${tui_pkgs[@]}"
-install_yay_packages "Dev Tools" "${development_tools_pkgs[@]}"
+install_yay_packages "CLI Tools" {{ range .pkgs_cli }}{{ . | quote }} {{ end }}
+install_yay_packages "TUI Applications" {{ range .pkgs_tui }}{{ . | quote }} {{ end }}
+install_yay_packages "Dev Tools" {{ range .pkgs_dev }}{{ . | quote }} {{ end }}
 
 {{ if not .headless -}}
-install_yay_packages "GUI Applications" "${gui_pkgs[@]}"
+install_yay_packages "GUI Applications" {{ range .pkgs_gui }}{{ . | quote }} {{ end }}
+install_yay_packages "Fonts" {{ range .pkgs_fonts }}{{ . | quote }} {{ end }}
 {{- end }}
 
-install_yay_packages "Fonts" "${font_pkgs[@]}"
-
 {{ if .install_hyprland -}}
-install_yay_packages "Hyprland and related" "${hyprland_pkgs[@]}"
+install_yay_packages "Hyprland and related" {{ range .pkgs_hyprland }}{{ . | quote }} {{ end }}
 {{- end }}
 
 {{ if .install_kde_apps }}
-install_yay_packages "KDE-Apps" "${kde_pkgs[@]}"
+install_yay_packages "KDE-Apps" {{ range .pkgs_kde }}{{ . | quote }} {{ end }}
 {{- end }}
 
 {{ if .install_media_related_pkgs }}
-install_yay_packages "Media related packages" "${media_pkgs[@]}"
+install_yay_packages "Media related packages" {{ range .pkgs_media }}{{ . | quote }} {{ end }}
 {{- end }}
 
 {{ if .install_timeshift }}
-install_yay_packages "Timeshift and related packages" "${timeshift_pkgs[@]}"
+install_yay_packages "Timeshift and related packages" {{ range .pkgs_timeshift }}{{ . | quote }} {{ end }}
 {{- end }}
 
-install_yay_packages "Other Tools" "${other_tools_pkgs[@]}"
+install_yay_packages "Other Tools" {{ range .pkgs_other }}{{ . | quote }} {{ end }}
 
 {{ end -}}

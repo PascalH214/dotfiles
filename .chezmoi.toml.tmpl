@@ -1,35 +1,136 @@
+{{/*
+=======================================================================
+                            PROMPTS
+=======================================================================
+*/}}
 {{- $email := promptStringOnce . "email" "What is your email?" -}}
 {{- $git_username := promptStringOnce . "git_username" "What should your git username be?" -}}
 {{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
+{{- $is_gui := not $headless -}}
 
-{{- $install_hyprland := and (not $headless)
-  (promptBoolOnce . "install_hyprland" "Do you want to install hyprland and related things?" true)
--}}
+{{- $install_hyprland := and $is_gui (promptBoolOnce . "install_hyprland" "Do you want to install hyprland and related things?" true) -}}
+{{- $install_ly := and $is_gui (promptBoolOnce . "install_ly" "Do you want to install ly (display-manager)?" true) -}}
+{{- $install_kde_apps := and $is_gui (promptBoolOnce . "install_kde_apps" "Do you want to install kde-apps?" true) -}}
+{{- $install_media_related_pkgs := and $is_gui (promptBoolOnce . "install_media_related_pkgs" "Do you want to install media related packages?" true) -}}
+{{- $install_timeshift := promptBoolOnce . "install_timeshift" "Do you want to install timeshift and related packages?" true -}}
 
-{{- $install_ly := and (not $headless)
-  (promptBoolOnce . "install_ly" "Do you want to install ly (display-manager)?" true)
--}}
+{{/*
+=======================================================================
+                        PACKAGE DEFINITIONS
+=======================================================================
+NOTE: All OS-specific package lists should be defined here.
+      The logic below will combine them based on the selected OS.
+*/}}
 
-{{- $install_kde_apps := and (not $headless)
-  (promptBoolOnce . "install_kde_apps" "Do you want to install kde-apps?" true)
--}}
+{{- $pkgs := dict -}}
 
-{{- $install_media_related_pkgs := and (not $headless)
-  (promptBoolOnce . "install_media_related_pkgs" "Do you want to install media related packages?" true)
--}}
+{{- $_ := set $pkgs "cli_arch" (list
+  "kitty" "fastfetch" "starship" "git" "man-db" "man-pages" "less" "zoxide" "fd"
+  "ripgrep" "bat" "7zip" "rar" "zip" "unzip" "rsync" "rclone" "translate-shell"
+) -}}
+{{- $_ := set $pkgs "cli_ubuntu" (list) -}}
 
-{{- $install_timeshift :=
-  (promptBoolOnce . "install_timeshift" "Do you want to install timeshift and related packages?" true)
--}}
+{{- $_ := set $pkgs "tui_arch" (list
+  "yazi" "neovim" "tmux" "tmuxinator" "bluetui" "fzf" "impala" "ncpamixer" "tree"
+) -}}
+{{- $_ := set $pkgs "tui_ubuntu" (list) -}}
+{{- if $install_ly -}}
+{{-   $_ := set $pkgs "tui_arch" (append ($pkgs.tui_arch) "ly") -}}
+{{-   $_ := set $pkgs "tui_ubuntu" (append ($pkgs.tui_ubuntu) "ly") -}}
+{{- end -}}
 
+{{- $_ := set $pkgs "dev_arch" (list
+  "docker" "docker-compose" "maven" "npm" "terraform"
+) -}}
+{{- $_ := set $pkgs "dev_ubuntu" (list) -}}
+
+{{- $_ := set $pkgs "gui_arch" (list
+  "visual-studio-code-bin" "google-chrome" "bitwarden" "discord"
+  "libreoffice-still" "thunderbird" "veracrypt"
+) -}}
+{{- $_ := set $pkgs "gui_ubuntu" (list) -}}
+
+{{- $_ := set $pkgs "fonts_arch" (list
+  "ttf-0xproto-nerd" "ttf-jetbrains-mono-nerd" "noto-fonts-emoji"
+) -}}
+{{- $_ := set $pkgs "fonts_ubuntu" (list) -}}
+
+{{- $_ := set $pkgs "hyprland_arch" (list
+  "hyprland" "hyprlock" "hyprshot" "rofi" "waybar" "wpaperd" "dunst"
+  "rose-pine-gtk-theme-full" "bluez" "bluez-utils" "brightnessctl" "pipewire"
+  "pipewire-pulse" "wireplumber"
+) -}}
+{{- $_ := set $pkgs "hyprland_ubuntu" (list) -}}
+
+{{- $_ := set $pkgs "kde_arch" (list
+  "qt5ct" "qt6ct-kde" "archlinux-xdg-menu" "xdg-desktop-portal-hyprland"
+  "dolphin" "ark" "okular" "kdialog" "kcalc" "keditfiletype"
+) -}}
+{{- $_ := set $pkgs "kde_ubuntu" (list) -}}
+
+{{- $_ := set $pkgs "media_arch" (list
+  "feishin-bin" "ffmpeg" "ffmpegthumbnailer" "tumbler" "vlc" "vlc-plugins-all"
+) -}}
+{{- $_ := set $pkgs "media_ubuntu" (list) -}}
+
+{{- $_ := set $pkgs "timeshift_arch" (list
+  "timeshift" "grub-btrfs" "timeshift-autosnap"
+) -}}
+{{- $_ := set $pkgs "timeshift_ubuntu" (list) -}}
+
+{{- $_ := set $pkgs "other_arch" (list) -}}
+{{- $_ := set $pkgs "other_ubuntu" (list) -}}
+{{- if not $headless -}}
+{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "naps2") -}}
+{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "system-config-printer") -}}
+{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "cups") -}}
+{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "selectdefaultapplication") -}}
+{{-   $_ := set $pkgs "other_ubuntu" (append ($pkgs.other_ubuntu) "naps2") -}}
+{{-   $_ := set $pkgs "other_ubuntu" (append ($pkgs.other_ubuntu) "system-config-printer") -}}
+{{-   $_ := set $pkgs "other_ubuntu" (append ($pkgs.other_ubuntu) "cups") -}}
+{{- end -}}
+
+
+{{/*
+=======================================================================
+                          FINAL DATA BLOCK
+=======================================================================
+*/}}
 [data]
 email = {{ $email | quote }}
 git_username = {{ $git_username | quote }}
 os = {{ $os | quote }}
 headless = {{ $headless }}
+
+# Installation flags
 install_hyprland = {{ $install_hyprland }}
 install_ly = {{ $install_ly }}
 install_kde_apps = {{ $install_kde_apps }}
 install_media_related_pkgs = {{ $install_media_related_pkgs }}
 install_timeshift = {{ $install_timeshift }}
+
+# Combined package lists
+{{- if eq .os "arch-linux" }}
+pkgs_cli = {{ get $pkgs "cli_arch" | toToml }}
+pkgs_tui = {{ get $pkgs "tui_arch" | toToml }}
+pkgs_dev = {{ get $pkgs "dev_arch" | toToml }}
+pkgs_gui = {{ get $pkgs "gui_arch" | toToml }}
+pkgs_fonts = {{ get $pkgs "fonts_arch" | toToml }}
+pkgs_hyprland = {{ get $pkgs "hyprland_arch" | toToml }}
+pkgs_kde = {{ get $pkgs "kde_arch" | toToml }}
+pkgs_media = {{ get $pkgs "media_arch" | toToml }}
+pkgs_timeshift = {{ get $pkgs "timeshift_arch" | toToml }}
+pkgs_other = {{ get $pkgs "other_arch" | toToml }}
+{{- else if eq .os "ubuntu" }}
+pkgs_cli = {{ get $pkgs "cli_ubuntu" | toToml }}
+pkgs_tui = {{ get $pkgs "tui_ubuntu" | toToml }}
+pkgs_dev = {{ get $pkgs "dev_ubuntu" | toToml }}
+pkgs_gui = {{ get $pkgs "gui_ubuntu" | toToml }}
+pkgs_fonts = {{ get $pkgs "fonts_ubuntu" | toToml }}
+pkgs_hyprland = {{ get $pkgs "hyprland_ubuntu" | toToml }}
+pkgs_kde = {{ get $pkgs "kde_ubuntu" | toToml }}
+pkgs_media = {{ get $pkgs "media_ubuntu" | toToml }}
+pkgs_timeshift = {{ get $pkgs "timeshift_ubuntu" | toToml }}
+pkgs_other = {{ get $pkgs "other_ubuntu" | toToml }}
+{{- end }}
