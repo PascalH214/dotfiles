@@ -82,13 +82,10 @@ NOTE: All OS-specific package lists should be defined here.
 {{- $_ := set $pkgs "other_arch" (list) -}}
 {{- $_ := set $pkgs "other_ubuntu" (list) -}}
 {{- if not $headless -}}
-{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "naps2") -}}
-{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "system-config-printer") -}}
-{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "cups") -}}
-{{-   $_ := set $pkgs "other_arch" (append ($pkgs.other_arch) "selectdefaultapplication") -}}
-{{-   $_ := set $pkgs "other_ubuntu" (append ($pkgs.other_ubuntu) "naps2") -}}
-{{-   $_ := set $pkgs "other_ubuntu" (append ($pkgs.other_ubuntu) "system-config-printer") -}}
-{{-   $_ := set $pkgs "other_ubuntu" (append ($pkgs.other_ubuntu) "cups") -}}
+{{-   $other_arch_packages := list "naps2" "system-config-printer" "cups" "selectdefaultapplication" -}}
+{{-   $_ := set $pkgs "other_arch" (concat ($pkgs.other_arch) $other_arch_packages) -}}
+{{-   $other_ubuntu_packages := list "naps2" "system-config-printer" "cups" -}}
+{{-   $_ := set $pkgs "other_ubuntu" (concat ($pkgs.other_ubuntu) $other_ubuntu_packages) -}}
 {{- end -}}
 
 
