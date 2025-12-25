@@ -56,7 +56,6 @@ tui_pkgs=(
 gui_pkgs=(
   visual-studio-code-bin
   google-chrome
-  dolphin
 )
 
 hyprland_pkgs=(
@@ -67,6 +66,12 @@ hyprland_pkgs=(
   kitty
   dunst
   ttf-0xproto-nerd
+)
+
+kde_pkgs=(
+  qt5ct
+  qt6ct-kde
+  dolphin
 )
 
 {{ if eq .os "arch-linux" -}}
@@ -83,6 +88,12 @@ install_yay_packages "GUI Applications" "${gui_pkgs[@]}"
 {{ if .install_hyprland -}}
 
 install_yay_packages "Hyprland and related" "${hyprland_pkgs[@]}"
+
+{{- end }}
+
+{{ if .install_kde_apps }}
+
+install_yay_packages "KDE-Apps" "${kde_pkgs[@]}"
 
 {{- end }}
 

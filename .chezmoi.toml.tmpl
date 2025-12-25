@@ -4,11 +4,15 @@
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
 
 {{- $install_hyprland := and (not $headless)
-      (promptBoolOnce . "install_hyprland" "Do you want to install hyprland and related things?" true)
+  (promptBoolOnce . "install_hyprland" "Do you want to install hyprland and related things?" true)
 -}}
 
 {{- $install_ly := and (not $headless)
-      (promptBoolOnce . "install_ly" "Do you want to install ly (display-manager)?" true)
+  (promptBoolOnce . "install_ly" "Do you want to install ly (display-manager)?" true)
+-}}
+
+{{- $install_kde_apps := and (not $headless)
+  (promptBoolOnce . "install_kde_apps" "Do you want to install kde-apps?" true)
 -}}
 
 [data]
@@ -18,3 +22,4 @@ os = {{ $os | quote }}
 headless = {{ $headless }}
 install_hyprland = {{ $install_hyprland }}
 install_ly = {{ $install_ly }}
+install_kde_apps = {{ $install_kde_apps }}
