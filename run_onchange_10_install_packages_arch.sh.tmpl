@@ -32,9 +32,7 @@ install_yay_packages() {
   done
   echo -e "${BLUE}======================================${NC}\n"
 
-  # We don't use --noconfirm because some packages could be from AUR
-  # and require manual intervention (e.g. reading the PKGBUILD).
-  yay -S --needed "${pkgs[@]}"
+  yay -S --noconfirm --needed "${pkgs[@]}"
 
   echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
 }

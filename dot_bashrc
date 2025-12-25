@@ -6,8 +6,8 @@ fastfetch
 
 set -o vi
 
-if [[ $(which starship) ]]; then
-  eval "$(starship init bash)"
+if [[ $(which oh-my-posh) ]]; then
+  eval "$(oh-my-posh init bash --config ~/.poshthemes/catppuccin_mocha.omp.json)"
 fi
 
 if [[ $(which zoxide) ]]; then
