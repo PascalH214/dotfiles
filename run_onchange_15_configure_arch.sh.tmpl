@@ -23,12 +23,64 @@ print_end() {
   echo -e "\n${GREEN}✓ Configure ${label} finished${NC}\n"
 }
 
-{{- if .install_ly }}
+{{ if eq .os "arch-linux" -}}
 
+{{- if .install_ly }}
 print_begin "ly (display-manager)"
 
 sudo systemctl enable ly@tty2.service
 
 print_end "ly (display-manager)"
+{{- end }}
+
+{{ if .install_kde_apps }}
+print_begin "kde file associations"
+
+sudo update-desktop-database
+kbuildsycoca6 --noincremental
+
+print_end "kde file associations"
+{{- end }}
+
+print_begin "docker"
+
+if ! getent group docker >/dev/null; then
+  sudo groupadd docker
+  info "Created docker group."
+else
+  warn "Docker group already exists."
+fi
+
+if ! id -nG "$USER" | grep -qw docker; then
+  sudo usermod -aG docker "$USER"
+  info "Added $USER to docker group. You may need to log out and log back in for this to take effect."
+else
+  warn "User $USER is already in the docker group."
+fi
+
+print_end "docker"
+
+print_begin "bluetooth"
+
+sudo systemctl enable --now bluetooth
+
+print_end "bluetooth"
+
+{{- if .install_timeshift }}
+print_begin "grub-btrfsd & teimshift-autosnap"
+
+sudo /etc/grub.d/41_snapshots-btrfs
+
+unit_path=$(systemctl show -p FragmentPath grub-btrfsd | cut -d= -f2)
+if [ -z "$unit_path" ]; then
+  error "Could not find unit path for grub-btrfsd."
+fi
+
+sudo sed -i 's|^ExecStart=.*|ExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto|' "$unit_path"
+sudo systemctl daemon-reload
+sudo systemctl enable --now grub-btrfsd
+
+print_end "grub-btrfsd & teimshift-autosnap"
+{{- end }}
 
 {{- end }}
