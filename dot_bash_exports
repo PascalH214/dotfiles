@@ -1,0 +1,6 @@
+export PATH=$PATH:$HOME/bin:$HOME/Applications/clion/bin:$HOME/.local/share/nvim/mason/bin:$HOME/.local/bin
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+export EDITOR=nvim
+export DISABLE_AUTO_TITLE='true'
+export TZ='Europe/Berlin'
+export SUDO_EDITOR='nvim'
