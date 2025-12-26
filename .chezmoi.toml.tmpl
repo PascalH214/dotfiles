@@ -108,7 +108,7 @@ install_media_related_pkgs = {{ $install_media_related_pkgs }}
 install_timeshift = {{ $install_timeshift }}
 
 # Combined package lists
-{{- if eq .os "arch-linux" }}
+{{- if eq $os "arch-linux" }}
 pkgs_cli = {{ get $pkgs "cli_arch" | toToml }}
 pkgs_tui = {{ get $pkgs "tui_arch" | toToml }}
 pkgs_dev = {{ get $pkgs "dev_arch" | toToml }}
@@ -119,7 +119,7 @@ pkgs_kde = {{ get $pkgs "kde_arch" | toToml }}
 pkgs_media = {{ get $pkgs "media_arch" | toToml }}
 pkgs_timeshift = {{ get $pkgs "timeshift_arch" | toToml }}
 pkgs_other = {{ get $pkgs "other_arch" | toToml }}
-{{- else if eq .os "ubuntu" }}
+{{- else if eq $os "ubuntu" }}
 pkgs_cli = {{ get $pkgs "cli_ubuntu" | toToml }}
 pkgs_tui = {{ get $pkgs "tui_ubuntu" | toToml }}
 pkgs_dev = {{ get $pkgs "dev_ubuntu" | toToml }}
