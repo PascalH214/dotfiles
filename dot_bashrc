@@ -1,6 +1,5 @@
 source ~/.bash_exports
 source ~/.bash_alias
-source ~/.bash_ssh
 
 fastfetch
 
