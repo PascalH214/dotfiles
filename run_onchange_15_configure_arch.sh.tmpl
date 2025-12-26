@@ -66,6 +66,13 @@ sudo systemctl enable --now bluetooth
 
 print_end "bluetooth"
 
+print_begin "SSH Agent (systemd user service)"
+
+systemctl --user daemon-reload
+systemctl --user enable ssh-agent.service
+systemctl --user start ssh-agent.service
+
+print_end "SSH Agent (systemd user service)"
 {{- if .install_timeshift }}
 print_begin "grub-btrfsd & teimshift-autosnap"
 

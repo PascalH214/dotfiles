@@ -1,20 +1,42 @@
-SSH_ENV="$HOME/.ssh/agent-environment"
+# Set up SSH agent using systemd user service
 
-function start_agent {
-  /usr/bin/ssh-agent | sed 's/^echo/#echo/' >"$SSH_ENV"
-  chmod 600 "$SSH_ENV"
-  . "$SSH_ENV" >/dev/null
-  /usr/bin/ssh-add
-}
-
-if [ -f "$SSH_ENV" ]; then
-  . "$SSH_ENV" >/dev/null
-  #ps $SSH_AGENT_PID doesn't work under Cygwin
-  ps -ef | grep $SSH_AGENT_PID | grep ssh-agent$ >/dev/null || {
-    start_agent
-  }
+if command -v systemctl >/dev/null; then
+    # Check if ssh-agent service is running
+    if systemctl --user is-active --quiet ssh-agent.service; then
+        # Service is running, get SSH_AUTH_SOCK
+        export SSH_AUTH_SOCK=$(systemctl --user show-environment | grep SSH_AUTH_SOCK | cut -d= -f2)
+    else
+        # Service is not running, start it
+        systemctl --user start ssh-agent.service
+        # Give it a moment to start and set up the socket
+        sleep 1
+        # Get SSH_AUTH_SOCK after starting
+        export SSH_AUTH_SOCK=$(systemctl --user show-environment | grep SSH_AUTH_SOCK | cut -d= -f2)
+    fi
+    # Add keys to the agent
+    find ~/.ssh -type f -name "id_*" ! -name "*.pub" -exec ssh-add {} + &>/dev/null
 else
-  start_agent
-fi
+    # Fallback for systems without systemd (or if systemctl is not in PATH)
+    # Original manual ssh-agent setup (simplified for brevity here, user can adapt)
+    SSH_ENV="$HOME/.ssh/agent-environment"
 
-find ~/.ssh -type f -name "id_*" ! -name "*.pub" -exec ssh-add {} + &>/dev/null
+    function start_agent {
+        /usr/bin/ssh-agent | sed 's/^echo/#echo/' >"$SSH_ENV"
+        chmod 600 "$SSH_ENV"
+        . "$SSH_ENV" >/dev/null
+        # Only add keys if a new agent was started
+        /usr/bin/ssh-add
+    }
+
+    if [ -f "$SSH_ENV" ]; then
+        . "$SSH_ENV" >/dev/null
+        # Check if the agent is still running
+        ps -ef | grep $SSH_AGENT_PID | grep ssh-agent$ >/dev/null || {
+            start_agent
+        }
+    else
+        start_agent
+    fi
+    # Ensure keys are added even if agent was already running
+    find ~/.ssh -type f -name "id_*" ! -name "*.pub" -exec ssh-add {} + &>/dev/null
+fi
