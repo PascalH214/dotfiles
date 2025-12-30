@@ -1,0 +1,31 @@
+#!/bin/bash
+
+install_code_extension() {
+  # The first argument is the Category Label
+  local label="$1"
+  # Shift moves arguments to the left, so $2 becomes $1, etc.
+  shift
+  # Now $@ contains only the package names
+  local pkgs=("$@")
+
+  if ! command -v yay >/dev/null 2>&1; then
+    echo -e "${RED}error:${NC} yay not installed" >&2
+    return 1
+  fi
+
+  if [ "${#pkgs[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo -e "${BLUE}======================================${NC}"
+  # Using the dynamic label here
+  echo -e "${BOLD}Installing ${label}:${NC}"
+  for pkg in "${pkgs[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo -e "${BLUE}======================================${NC}\n"
+
+  yay -S --noconfirm --needed "${pkgs[@]}"
+
+  echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
+}
