@@ -53,7 +53,7 @@ install_npm_packages() {
   done
   echo ""
 
-  npm install -g "${pkgs_to_install[@]}"
+  sudo npm install -g "${pkgs_to_install[@]}"
 
   echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
 }
