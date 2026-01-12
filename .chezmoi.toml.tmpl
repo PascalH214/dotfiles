@@ -3,7 +3,6 @@
                             PROMPTS
 =======================================================================
 */}}
-{{- $location := promptStringOnce . "location" "What is your (not exact) location? (needed for weather)" -}}
 {{- $email := promptStringOnce . "email" "What is your email?" -}}
 {{- $git_username := promptStringOnce . "git_username" "What should your git username be?" -}}
 {{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
@@ -15,6 +14,7 @@
 {{- $install_kde_apps := and $is_gui (promptBoolOnce . "install_kde_apps" "Do you want to install kde-apps?" true) -}}
 {{- $install_media_related_pkgs := and $is_gui (promptBoolOnce . "install_media_related_pkgs" "Do you want to install media related packages?" true) -}}
 {{- $install_timeshift := promptBoolOnce . "install_timeshift" "Do you want to install timeshift and related packages?" true -}}
+{{- $location := and $install_hyprland (promptStringOnce . "location" "What is your (not exact) location? (needed for weather)") -}}
 
 {{/*
 =======================================================================
