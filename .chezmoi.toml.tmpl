@@ -4,6 +4,19 @@
 =======================================================================
 */}}
 {{- $email := promptStringOnce . "email" "What is your email?" -}}
+{{- $timezone := promptChoiceOnce . "timezone" "Choose your timezone" (list
+  "UTC"
+  "Europe/Berlin"
+  "Europe/London"
+  "Europe/Paris"
+  "Europe/Vienna"
+  "Europe/Zurich"
+  "America/New_York"
+  "America/Chicago"
+  "America/Los_Angeles"
+  "Asia/Tokyo"
+  "Asia/Shanghai"
+) "Europe/Berlin" -}}
 {{- $git_username := promptStringOnce . "git_username" "What should your git username be?" -}}
 {{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
@@ -98,6 +111,7 @@ NOTE: All OS-specific package lists should be defined here.
 [data]
 location = {{ $location | quote }}
 email = {{ $email | quote }}
+timezone = {{ $timezone | quote }}
 git_username = {{ $git_username | quote }}
 os = {{ $os | quote }}
 headless = {{ $headless }}
