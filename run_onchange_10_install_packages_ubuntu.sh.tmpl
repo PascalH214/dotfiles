@@ -7,17 +7,13 @@ BOLD='\033[1m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-install_apt_packages() {
-  # The first argument is the Category Label
+install_snap_packages() {
   local label="$1"
-  # Shift moves arguments to the left, so $2 becomes $1, etc.
   shift
-  # Now $@ contains only the package names
   local pkgs=("$@")
 
-  if ! command -v apt >/dev/null 2>&1;
-    then
-    echo -e "${RED}error:${NC} apt not installed" >&2
+  if ! command -v snap >/dev/null 2>&1; then
+    echo -e "${RED}error:${NC} snap not installed" >&2
     return 1
   fi
 
@@ -26,49 +22,46 @@ install_apt_packages() {
   fi
 
   echo -e "${BLUE}======================================${NC}"
-  # Using the dynamic label here
   echo -e "${BOLD}Installing ${label}:${NC}"
   for pkg in "${pkgs[@]}"; do
     echo -e "  ${BLUE}->${NC} $pkg"
   done
   echo -e "${BLUE}======================================${NC}\n"
 
-  sudo apt update
-  sudo apt install -y "${pkgs[@]}"
+  for pkg in "${pkgs[@]}"; do
+    sudo snap install "$pkg"
+  done
 
   echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
 }
 
-# The entire installation logic is now driven by the data
-# in .chezmoi.toml.tmpl. This script only defines *how* to install.
-
 {{ if eq .os "ubuntu" -}}
 
-install_apt_packages "CLI Tools" {{ range .pkgs_cli }}{{ . | quote }} {{ end }}
-install_apt_packages "TUI Applications" {{ range .pkgs_tui }}{{ . | quote }} {{ end }}
-install_apt_packages "Dev Tools" {{ range .pkgs_dev }}{{ . | quote }} {{ end }}
+install_snap_packages "CLI Tools" {{ range .pkgs_cli }}{{ . | quote }} {{ end }}
+install_snap_packages "TUI Applications" {{ range .pkgs_tui }}{{ . | quote }} {{ end }}
+install_snap_packages "Dev Tools" {{ range .pkgs_dev }}{{ . | quote }} {{ end }}
 
 {{ if not .headless -}}
-install_apt_packages "GUI Applications" {{ range .pkgs_gui }}{{ . | quote }} {{ end }}
-install_apt_packages "Fonts" {{ range .pkgs_fonts }}{{ . | quote }} {{ end }}
+install_snap_packages "GUI Applications" {{ range .pkgs_gui }}{{ . | quote }} {{ end }}
+install_snap_packages "Fonts" {{ range .pkgs_fonts }}{{ . | quote }} {{ end }}
 {{- end }}
 
 {{ if .install_hyprland -}}
-install_apt_packages "Hyprland and related" {{ range .pkgs_hyprland }}{{ . | quote }} {{ end }}
+install_snap_packages "Hyprland and related" {{ range .pkgs_hyprland }}{{ . | quote }} {{ end }}
 {{- end }}
 
 {{ if .install_kde_apps }}
-install_apt_packages "KDE-Apps" {{ range .pkgs_kde }}{{ . | quote }} {{ end }}
+install_snap_packages "KDE-Apps" {{ range .pkgs_kde }}{{ . | quote }} {{ end }}
 {{- end }}
 
 {{ if .install_media_related_pkgs }}
-install_apt_packages "Media related packages" {{ range .pkgs_media }}{{ . | quote }} {{ end }}
+install_snap_packages "Media related packages" {{ range .pkgs_media }}{{ . | quote }} {{ end }}
 {{- end }}
 
 {{ if .install_timeshift }}
-install_apt_packages "Timeshift and related packages" {{ range .pkgs_timeshift }}{{ . | quote }} {{ end }}
+install_snap_packages "Timeshift and related packages" {{ range .pkgs_timeshift }}{{ . | quote }} {{ end }}
 {{- end }}
 
-install_apt_packages "Other Tools" {{ range .pkgs_other }}{{ . | quote }} {{ end }}
+install_snap_packages "Other Tools" {{ range .pkgs_other }}{{ . | quote }} {{ end }}
 
 {{ end -}}
