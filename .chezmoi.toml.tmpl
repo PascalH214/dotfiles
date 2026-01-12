@@ -101,8 +101,14 @@ NOTE: All OS-specific package lists should be defined here.
 {{-   $other_arch_packages := list "naps2" "system-config-printer" "cups" "selectdefaultapplication" -}}
 {{-   $_ := set $pkgs "other_arch" (concat ($pkgs.other_arch) $other_arch_packages) -}}
 {{-   $other_ubuntu_packages := list "naps2" "system-config-printer" "cups" -}}
-{{-   $_ := set $pkgs "other_ubuntu" (concat ($pkgs.other_ubuntu) $other_ubuntu_packages) -}}
+{{- $_ := set $pkgs "other_ubuntu" (concat ($pkgs.other_ubuntu) $other_ubuntu_packages) -}}
 {{- end -}}
+
+{{- $_ := set $pkgs "npm" (list
+  "@bitwarden/cli"
+) -}}
+
+
 
 
 {{/*
@@ -139,6 +145,7 @@ pkgs_kde = {{ get $pkgs "kde_arch" | toToml }}
 pkgs_media = {{ get $pkgs "media_arch" | toToml }}
 pkgs_timeshift = {{ get $pkgs "timeshift_arch" | toToml }}
 pkgs_other = {{ get $pkgs "other_arch" | toToml }}
+pkgs_npm = {{ get $pkgs "npm" | toToml }}
 {{- else if eq $os "ubuntu" }}
 pkgs_cli = {{ get $pkgs "cli_ubuntu" | toToml }}
 pkgs_tui = {{ get $pkgs "tui_ubuntu" | toToml }}
@@ -150,4 +157,5 @@ pkgs_kde = {{ get $pkgs "kde_ubuntu" | toToml }}
 pkgs_media = {{ get $pkgs "media_ubuntu" | toToml }}
 pkgs_timeshift = {{ get $pkgs "timeshift_ubuntu" | toToml }}
 pkgs_other = {{ get $pkgs "other_ubuntu" | toToml }}
+pkgs_npm = {{ get $pkgs "npm" | toToml }}
 {{- end }}

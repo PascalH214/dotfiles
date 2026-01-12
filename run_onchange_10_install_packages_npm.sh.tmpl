@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+install_npm_packages() {
+  # The first argument is the Category Label
+  local label="$1"
+  # Shift moves arguments to the left, so $2 becomes $1, etc.
+  shift
+  # Now $@ contains only the package names
+  local pkgs=("$@")
+
+  if ! command -v npm >/dev/null 2>&1; then
+    echo -e "${RED}error:${NC} npm not installed" >&2
+    return 1
+  fi
+
+  if [ "${#pkgs[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo -e "${BLUE}======================================${NC}"
+  # Using the dynamic label here
+  echo -e "${BOLD}Installing ${label}:${NC}"
+  for pkg in "${pkgs[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo -e "${BLUE}======================================${NC}\n"
+
+  local pkgs_to_install=()
+  for pkg in "${pkgs[@]}"; do
+    # npm list -g exits with 1 if the package is not installed
+    if ! npm list -g --depth=0 "$pkg" >/dev/null 2>&1; then
+      pkgs_to_install+=("$pkg")
+    else
+      echo -e "${GREEN}${pkg} is already installed, skipping.${NC}"
+    fi
+  done
+
+  if [ ${#pkgs_to_install[@]} -eq 0 ]; then
+    echo -e "\n${GREEN}✓ All ${label} are already installed.${NC}\n"
+    return 0
+  fi
+
+  echo -e "\n${BOLD}Installing missing packages:${NC}"
+  for pkg in "${pkgs_to_install[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo ""
+
+  npm install -g "${pkgs_to_install[@]}"
+
+  echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
+}
+
+# The entire installation logic is now driven by the data
+# in .chezmoi.toml.tmpl. This script only defines *how* to install.
+
+# The pkgs_npm variable should be defined in .chezmoi.toml.tmpl
+install_npm_packages "NPM Packages" {{ range .pkgs_npm }}{{ . | quote }} {{ end }}
