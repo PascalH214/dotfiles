@@ -17,6 +17,8 @@
   "Asia/Tokyo"
   "Asia/Shanghai"
 ) "Europe/Berlin" -}}
+{{- $bw_server_url := promptStringOnce . "bw_server_url" "Bitwarden server URL (self-hosted)" -}}
+{{- $bw_ssh_key := promptStringOnce . "bw_ssh_key" "Bitwarden SSH key item name (leave empty to skip)" -}}
 {{- $git_username := promptStringOnce . "git_username" "What should your git username be?" -}}
 {{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
@@ -109,6 +111,8 @@ NOTE: All OS-specific package lists should be defined here.
 =======================================================================
 */}}
 [data]
+bw_ssh_key = {{ $bw_ssh_key | quote }}
+bw_server_url = {{ $bw_server_url | quote }}
 location = {{ $location | quote }}
 email = {{ $email | quote }}
 timezone = {{ $timezone | quote }}
