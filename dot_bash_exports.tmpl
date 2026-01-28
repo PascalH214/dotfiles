@@ -5,3 +5,8 @@ export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 export EDITOR=nvim
 export DISABLE_AUTO_TITLE='true'
 export SUDO_EDITOR='nvim'
+
+# amd-stuff
+export ROCM_PATH=/opt/rocm
+export PATH=$PATH:/opt/rocm/bin
+export LD_LIBRARY_PATH=/opt/rocm/lib:$LD_LIBRARY_PATH
