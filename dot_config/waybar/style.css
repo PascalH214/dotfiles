@@ -104,6 +104,7 @@
 #waybar.main #custom-weather,
 #waybar.main #custom-weather,
 #waybar.main #custom-battery,
+#waybar.main #custom-gpu,
 #waybar.main #keyboard-state,
 #waybar.main #network,
 #waybar.main #battery,
@@ -138,6 +139,7 @@
 /* Module colors */
 /* {{{ */
 #waybar.main #custom-nvidia,
+#waybar.main #custom-gpu,
 #waybar.main #cpu,
 #waybar.main #temperature,
 #waybar.main #memory.ram,

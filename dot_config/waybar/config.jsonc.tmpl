@@ -25,6 +25,7 @@
     "modules-right": [
       "custom/spacer1",
       "cpu",
+      "custom/gpu",
       // "group/storage",
       "memory#ram",
       "memory#swap",
@@ -87,6 +88,13 @@
       "interval": 60,
       "exec": "wttrbar --nerd --location {{ .location }}",
       "return-type": "json"
+    },
+
+    "custom/gpu": {
+      "exec": "cat /sys/class/hwmon/hwmon1/device/gpu_busy_percent",
+      "format": " {}%",
+      "return-type": "",
+      "interval": 1
     },
 
     "group/traym": {
