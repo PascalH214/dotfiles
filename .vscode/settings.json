@@ -1,12 +1,23 @@
 {
   "cSpell.words": [
+    "amdgpu",
     "bitwarden",
     "chezmoi",
+    "cuda",
+    "cudnn",
+    "dkms",
+    "DXVK",
     "fastfetch",
+    "Gamescope",
+    "Goverlay",
     "hypr",
+    "Lutris",
     "nvim",
     "pacman",
+    "radeontop",
     "rofi",
+    "Solaar",
+    "Timeshift",
     "waybar",
     "yazi"
   ]
