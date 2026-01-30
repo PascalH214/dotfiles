@@ -1,0 +1,11 @@
+---
+- name: Configure Ly display manager
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Enable vi mode in Ly config
+      ansible.builtin.lineinfile:
+        path: /etc/ly/config.ini
+        regexp: '^vi_mode\s*='
+        line: 'vi_mode = true'
+        backup: true
