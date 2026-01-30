@@ -1,31 +1,43 @@
 #!/bin/bash
-set -eu
 
 KEY_NAME="{{ .bw_ssh_key }}"
+BW_SERVER_URL="{{ .bw_server_url }}"
 
-export BW_SERVER_URL="{{ .bw_server_url }}"
-export BW_SESSION="$(bw unlock --raw)"
-
-printf "BW_SERVER: %s\nKEY_NAME: %s\n" "$BW_SERVER_URL" "$KEY_NAME"
+export BW_SERVER_URL
 
 [ -z "$KEY_NAME" ] && exit 0
 
+# --- Bitwarden: hard reset + correct server ---
+bw logout >/dev/null 2>&1 || true
+bw config server "$BW_SERVER_URL"
+
+# Login (interactive)
+bw login
+
+# Unlock vault
+export BW_SESSION="$(bw unlock --raw)"
+
+# Sync to ensure latest data
+bw sync --quiet
+
+printf "BW_SERVER: %s\nKEY_NAME: %s\n" "$BW_SERVER_URL" "$KEY_NAME"
+
+# --- SSH paths ---
 SSH_DIR="$HOME/.ssh"
-KEY_BASENAME="$KEY_NAME"
-KEY_PATH="$SSH_DIR/$KEY_BASENAME"
+KEY_PATH="$SSH_DIR/$KEY_NAME"
 SSH_CONFIG="$SSH_DIR/config"
 
 mkdir -p "$SSH_DIR"
 chmod 700 "$SSH_DIR"
 
-# Write private key (SSH item type)
+# --- Write private key ---
 bw get item "$KEY_NAME" \
   | jq -r '.sshKey.privateKey' \
   > "$KEY_PATH"
 
 chmod 600 "$KEY_PATH"
 
-# Write public key if present
+# --- Write public key if present ---
 if bw get item "$KEY_NAME" | jq -e '.sshKey.publicKey | length > 0' >/dev/null; then
   bw get item "$KEY_NAME" \
     | jq -r '.sshKey.publicKey' \
@@ -33,11 +45,10 @@ if bw get item "$KEY_NAME" | jq -e '.sshKey.publicKey | length > 0' >/dev/null; 
   chmod 644 "${KEY_PATH}.pub"
 fi
 
-# Ensure SSH config exists
+# --- SSH config ---
 touch "$SSH_CONFIG"
 chmod 600 "$SSH_CONFIG"
 
-# Enforce key as default identity
 if ! grep -q "^[[:space:]]*IdentityFile[[:space:]]\+$KEY_PATH\$" "$SSH_CONFIG"; then
   cat >> "$SSH_CONFIG" <<EOF
 
