@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+echo -e "${BLUE}======================================${NC}"
+echo -e "${BOLD}Configure iwd (iNet Wireless Daemon)${NC}"
+echo -e "${BLUE}======================================${NC}\n"
+
+# Check if ansible is installed
+if ! command -v ansible-playbook &> /dev/null; then
+    echo -e "${RED}Error: ansible is not installed${NC}"
+    echo -e "${YELLOW}Please install ansible first: sudo pacman -S ansible (Arch) or sudo apt install ansible (Ubuntu)${NC}"
+    exit 1
+fi
+
+# Get the chezmoi source directory
+CHEZMOI_SOURCE_DIR="{{ .chezmoi.sourceDir }}"
+PLAYBOOK_PATH="${CHEZMOI_SOURCE_DIR}/ansible_iwd.yml"
+
+if [ ! -f "${PLAYBOOK_PATH}" ]; then
+    echo -e "${RED}Error: Ansible playbook not found at ${PLAYBOOK_PATH}${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Running Ansible playbook to configure iwd...${NC}\n"
+
+# Run the Ansible playbook
+ansible-playbook "${PLAYBOOK_PATH}" --ask-become-pass
+
+if [ $? -eq 0 ]; then
+    echo -e "\n${GREEN}✓ iwd configuration completed successfully${NC}"
+else
+    echo -e "\n${RED}✗ iwd configuration failed${NC}"
+    exit 1
+fi

@@ -1,0 +1,35 @@
+---
+- name: Configure iwd (iNet Wireless Daemon)
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+    - name: Ensure /etc/iwd directory exists
+      ansible.builtin.file:
+        path: /etc/iwd
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Configure iwd main.conf
+      ansible.builtin.copy:
+        dest: /etc/iwd/main.conf
+        content: |
+          [General]
+          EnableNetworkConfiguration=true
+
+          [Network]
+          EnableIPv6=true
+          NameResolvingService=systemd
+        mode: '0644'
+        owner: root
+        group: root
+      notify: Restart iwd service
+
+  handlers:
+    - name: Restart iwd service
+      ansible.builtin.systemd:
+        name: iwd
+        state: restarted
+        enabled: true
