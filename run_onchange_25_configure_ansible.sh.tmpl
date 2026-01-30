@@ -45,7 +45,7 @@ if ! command -v ansible-playbook &> /dev/null; then
 fi
 
 # Get the chezmoi source directory
-CHEZMOI_SOURCE_DIR="{{ .chezmoi.sourceDir }}"
+ANSIBLE_DIR="{{ .chezmoi.sourceDir }}/ansible_playbooks"
 
 # Ask for password once
 read -sp "Enter sudo password: " BECOME_PASSWORD
@@ -53,8 +53,8 @@ echo ""
 
 # Define playbooks to run
 declare -a PLAYBOOKS=(
-  "Configure system timezone:${CHEZMOI_SOURCE_DIR}/ansible_timezone.yml"
-  "Configure iwd (iNet Wireless Daemon):${CHEZMOI_SOURCE_DIR}/ansible_iwd.yml"
+  "Configure system timezone:${ANSIBLE_DIR}/ansible_timezone.yml"
+  "Configure iwd (iNet Wireless Daemon):${ANSIBLE_DIR}/ansible_iwd.yml"
 )
 
 # Track failures
