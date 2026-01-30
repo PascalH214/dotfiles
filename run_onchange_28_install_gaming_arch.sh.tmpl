@@ -86,10 +86,39 @@ print_info "Installing performance monitoring tools..."
 
 yay -S --noconfirm --needed \
   cpu-x \
-  gpu-burn \
-  unigine-superposition
+  gpu-burn
 
 print_success "Performance monitoring tools installed"
+
+# Install GPU-specific monitoring tools based on vendor
+gpu_vendor="{{ .gpu_vendor }}"
+
+if [ "$gpu_vendor" != "none" ]; then
+  print_info "Installing GPU-specific monitoring tools for $gpu_vendor..."
+  
+  case "$gpu_vendor" in
+    amd)
+      # AMD-specific tools (radeontop already installed in GPU driver script)
+      yay -S --noconfirm --needed rocm-opencl-runtime
+      print_success "AMD monitoring tools installed"
+      ;;
+    nvidia)
+      # NVIDIA-specific tools
+      yay -S --noconfirm --needed nvidia-settings nvidia-utils
+      print_success "NVIDIA monitoring tools installed"
+      ;;
+    intel)
+      # Intel-specific tools
+      yay -S --noconfirm --needed intel-gpu-tools intel-media-driver
+      print_success "Intel monitoring tools installed"
+      ;;
+  esac
+fi
+
+# Install universal benchmarking tool
+yay -S --noconfirm --needed unigine-superposition
+
+print_success "GPU-specific and benchmarking tools installed"
 
 # Install peripheral tools
 print_info "Installing gaming peripheral tools..."
