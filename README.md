@@ -95,6 +95,7 @@ Setup scripts run automatically when their source files change:
 - `run_onchange_22_install_amd_drivers_arch.sh.tmpl` - GPU drivers installation (AMD, NVIDIA, Intel)
 - `run_onchange_25_configure_ansible.sh.tmpl` - Run all Ansible playbooks
 - `run_onchange_25_configure_arch.sh.tmpl` - Arch Linux specific configuration
+- `run_onchange_28_install_gaming_arch.sh.tmpl` - Gaming setup and optimizations
 - `run_onchange_30_code_extensions.sh.tmpl` - Install VS Code extensions
 
 ## Configuration Files
@@ -140,6 +141,20 @@ GPU driver installation is configured via the `gpu_vendor` setting during chezmo
 - **None**: Skip GPU driver installation
 
 The script is run automatically during `chezmoi apply` if a GPU vendor is selected.
+
+### Gaming Setup
+
+Optional gaming configuration includes:
+
+- **Game Launchers**: Steam, Lutris, Heroic Games Launcher, Bottles
+- **Compatibility Tools**: Wine, Proton (GE-Custom), DXVK, VKD3D
+- **Performance Tools**: GameMode, Gamescope, MangoHUD, Goverlay
+- **Monitoring**: CPU-X, GPU monitoring tools, FPS overlay
+- **Peripherals**: Piper (mouse), Solaar (Logitech), OpenRGB (LED control)
+- **Kernel Optimizations**: Tuned parameters for reduced latency and jitter
+- **Helper Scripts**: Gaming environment setup with pre-configured settings
+
+Enabled via the `install_gaming` flag during chezmoi initialization.
 
 ### System Tools
 
