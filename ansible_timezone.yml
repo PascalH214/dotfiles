@@ -1,0 +1,9 @@
+---
+- name: Configure system timezone
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+    - name: Set system timezone to Europe/Berlin
+      community.general.timezone:
+        name: Europe/Berlin
