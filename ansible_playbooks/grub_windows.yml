@@ -1,0 +1,137 @@
+---
+- name: Add Windows entry to GRUB
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Gather block device information
+      ansible.builtin.command: lsblk -J -o NAME,PATH,FSTYPE,PARTTYPE,UUID,LABEL,MOUNTPOINT
+      register: lsblk_json
+      changed_when: false
+
+    - name: Set EFI partition GUID
+      ansible.builtin.set_fact:
+        efi_guid: "c12a7328-f81f-11d2-ba4b-00a0c93ec93b"
+
+    - name: Build list of EFI partitions
+      ansible.builtin.set_fact:
+        efi_partitions: >-
+          {{
+            (lsblk_json.stdout | from_json).blockdevices
+            | map(attribute='children')
+            | select('defined')
+            | flatten
+            | selectattr('parttype', 'defined')
+            | selectattr('parttype', 'equalto', efi_guid)
+            | list
+          }}
+
+    - name: Initialize EFI candidate list
+      ansible.builtin.set_fact:
+        efi_candidates: []
+
+    - name: Build EFI candidate mounts
+      ansible.builtin.set_fact:
+        efi_candidates: >-
+          {{
+            efi_candidates + [
+              {
+                'name': item.name,
+                'path': item.path | default('/dev/' ~ item.name),
+                'uuid': item.uuid | default(''),
+                'mountpoint': ((item.mountpoint | default('')) | ternary(item.mountpoint, '/mnt/efi-' ~ (item.uuid | default(item.name))))
+                  | string,
+                'was_mounted': (item.mountpoint is defined and item.mountpoint is not none and item.mountpoint != '')
+              }
+            ]
+          }}
+      loop: "{{ efi_partitions }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Fail if no EFI partitions were found
+      ansible.builtin.fail:
+        msg: No EFI system partitions found (PARTTYPE EFI). Cannot add Windows entry.
+      when: efi_candidates | length == 0
+
+    - name: Ensure mountpoints exist for unmounted EFI partitions
+      ansible.builtin.file:
+        path: "{{ item.mountpoint }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      loop: "{{ efi_candidates }}"
+      when: not item.was_mounted
+
+    - name: Detect Windows bootloader on EFI partitions
+      block:
+        - name: Mount unmounted EFI partitions
+          ansible.posix.mount:
+            path: "{{ item.mountpoint }}"
+            src: "{{ item.path }}"
+            fstype: vfat
+            state: mounted
+          loop: "{{ efi_candidates }}"
+          when: not item.was_mounted
+
+        - name: Check for Windows bootloader on EFI mounts
+          ansible.builtin.stat:
+            path: "{{ item.mountpoint }}/EFI/Microsoft/Boot/bootmgfw.efi"
+          loop: "{{ efi_candidates }}"
+          register: windows_efi_candidates
+          changed_when: false
+
+        - name: Select Windows EFI UUID
+          ansible.builtin.set_fact:
+            windows_efi_uuid: "{{ item.item.uuid }}"
+          loop: "{{ windows_efi_candidates.results }}"
+          when: item.stat.exists | default(false)
+          loop_control:
+            label: "{{ item.item.mountpoint }}"
+      always:
+        - name: Unmount temporary EFI mounts
+          ansible.posix.mount:
+            path: "{{ item.mountpoint }}"
+            state: unmounted
+          loop: "{{ efi_candidates }}"
+          when: not item.was_mounted
+
+    - name: Fail if Windows EFI bootloader not found
+      ansible.builtin.fail:
+        msg: >-
+          Windows EFI bootloader not found on any EFI partition.
+          Ensure the Windows ESP contains /EFI/Microsoft/Boot/bootmgfw.efi.
+      when: windows_efi_uuid is not defined
+
+    - name: Add Windows entry to GRUB custom menu
+      ansible.builtin.blockinfile:
+        path: /etc/grub.d/40_custom
+        create: true
+        owner: root
+        group: root
+        mode: '0755'
+        marker: "# {mark} ANSIBLE WINDOWS ENTRY"
+        block: |
+          menuentry 'Windows' {
+             search --fs-uuid --set=root {{ windows_efi_uuid }}
+             chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+          }
+      register: grub_custom_result
+
+    - name: Update GRUB config (Arch)
+      ansible.builtin.command: grub-mkconfig -o /boot/grub/grub.cfg
+      when:
+        - ansible_facts['os_family'] == 'Archlinux'
+        - grub_custom_result is defined
+        - grub_custom_result.changed
+      changed_when: false
+
+    - name: Update GRUB config (Debian/Ubuntu)
+      ansible.builtin.command: update-grub
+      when:
+        - ansible_facts['os_family'] == 'Debian'
+        - grub_custom_result is defined
+        - grub_custom_result.changed
+      changed_when: false
