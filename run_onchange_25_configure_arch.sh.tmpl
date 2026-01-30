@@ -58,6 +58,8 @@ else
   warn "User $USER is already in the docker group."
 fi
 
+sudo systemctl enable --now docker
+
 print_end "docker"
 
 print_begin "bluetooth"
