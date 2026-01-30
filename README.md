@@ -52,6 +52,7 @@ chezmoi init --apply --source /path/to/dotfiles
 ```
 
 The setup will prompt you to customize several options:
+
 - **OS**: Arch Linux or Ubuntu
 - **Headless**: Whether your system has a GUI
 - **Desktop Environment**: Hyprland setup (GUI systems)
