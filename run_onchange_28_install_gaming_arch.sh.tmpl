@@ -38,11 +38,44 @@ if ! command -v yay >/dev/null 2>&1; then
   exit 1
 fi
 
+# Enable multilib repository (required for steam and 32-bit gaming libraries)
+# Multilib provides 32-bit support needed for most Windows games via Wine/Proton
+print_info "Checking multilib repository status..."
+
+if ! grep -q "^\[multilib\]" /etc/pacman.conf 2>/dev/null; then
+  print_warning "Multilib (32-bit support) is not enabled"
+  print_info "Most Windows games require 32-bit libraries for Wine/Proton compatibility"
+  
+  read -p "Enable multilib now? (y/n) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    print_info "Enabling multilib repository..."
+    
+    # Uncomment [multilib] section
+    sudo sed -i '/^#\[multilib\]/s/^#//' /etc/pacman.conf
+    
+    # Uncomment the Include line for multilib
+    sudo sed -i '/^\[multilib\]/a Include = /etc/pacman.d/mirrorlist' /etc/pacman.conf
+    
+    # Update package cache
+    sudo pacman -Sy --noconfirm
+    
+    print_success "Multilib repository enabled"
+  else
+    print_warning "Skipping multilib - Steam and Wine games may not work correctly"
+  fi
+else
+  print_info "Multilib repository already enabled"
+fi
+
 # Install core gaming packages
 print_info "Installing core gaming packages..."
 
+# Steam is in official multilib repo, not AUR
+yay -S --noconfirm --needed steam
+
+# Rest of gaming packages from AUR
 yay -S --noconfirm --needed \
-  steam \
   proton-ge-custom-bin \
   gamemode \
   gamescope \

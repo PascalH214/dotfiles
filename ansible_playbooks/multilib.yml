@@ -1,0 +1,36 @@
+---
+- name: Enable Arch Linux multilib repository
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+    - name: Check if multilib is already enabled
+      lineinfile:
+        path: /etc/pacman.conf
+        line: "[multilib]"
+        state: present
+      register: multilib_check
+      check_mode: yes
+      changed_when: false
+
+    - name: Enable multilib repository
+      block:
+        - name: Uncomment [multilib] section
+          lineinfile:
+            path: /etc/pacman.conf
+            regexp: '^#\[multilib\]'
+            line: '[multilib]'
+            backup: yes
+
+        - name: Uncomment multilib mirror list
+          lineinfile:
+            path: /etc/pacman.conf
+            regexp: '^#Include = /etc/pacman.d/mirrorlist'
+            line: 'Include = /etc/pacman.d/mirrorlist'
+            insertafter: '^\[multilib\]'
+            backup: yes
+
+        - name: Update package cache
+          pacman:
+            update_cache: yes
+      when: multilib_check.found == 0
