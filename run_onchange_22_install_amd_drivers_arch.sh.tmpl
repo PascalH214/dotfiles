@@ -1,0 +1,145 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+print_section() {
+  echo -e "${BLUE}======================================${NC}"
+  echo -e "${BOLD}$1${NC}"
+  echo -e "${BLUE}======================================${NC}\n"
+}
+
+print_success() {
+  echo -e "${GREEN}✓ $1${NC}\n"
+}
+
+print_info() {
+  echo -e "${BLUE}ℹ $1${NC}"
+}
+
+print_warning() {
+  echo -e "${YELLOW}⚠ $1${NC}"
+}
+
+{{ if eq .os "arch-linux" -}}
+
+{{ if ne .gpu_vendor "none" -}}
+
+print_section "GPU Drivers Installation"
+
+# Check if yay is available
+if ! command -v yay >/dev/null 2>&1; then
+  echo -e "${RED}error:${NC} yay not installed" >&2
+  exit 1
+fi
+
+gpu_vendor="{{ .gpu_vendor }}"
+
+case $gpu_vendor in
+  amd)
+    print_section "Installing AMD GPU Drivers"
+    
+    print_info "Installing AMD GPU drivers and utilities..."
+    
+    # Install AMD AMDGPU driver and utilities (using official repos)
+    yay -S --noconfirm --needed \
+      xf86-video-amdgpu \
+      vulkan-radeon \
+      lib32-vulkan-radeon \
+      libva-mesa-driver \
+      lib32-libva-mesa-driver \
+      mesa \
+      lib32-mesa
+    
+    if [ $? -eq 0 ]; then
+      print_success "AMD GPU drivers installed"
+    else
+      print_warning "Some GPU driver packages failed to install - this may be expected for lib32 packages"
+    fi
+    
+    # Install additional tools for monitoring and control
+    print_info "Installing AMD GPU management tools..."
+    
+    yay -S --noconfirm --needed \
+      radeontop \
+      rocm-opencl-runtime
+    
+    print_success "AMD GPU management tools installed"
+    
+    # Configure kernel parameters for AMD GPU
+    print_info "Checking AMD GPU kernel parameters..."
+    
+    # Add amdgpu.ppfeaturemask if not already present
+    if ! grep -q "amdgpu.ppfeaturemask" /proc/cmdline 2>/dev/null; then
+      print_warning "Consider adding 'amdgpu.ppfeaturemask=0xffffffff' to kernel parameters for full power management features"
+      print_info "This can be done via GRUB or other bootloader configuration"
+    fi
+    
+    # Load kernel modules
+    print_info "Loading AMD GPU kernel modules..."
+    sudo modprobe amdgpu
+    print_success "AMD GPU kernel modules loaded"
+    
+    print_success "AMD drivers installation and configuration completed!"
+    ;;
+    
+  nvidia)
+    print_section "Installing NVIDIA GPU Drivers"
+    
+    print_info "Installing NVIDIA drivers..."
+    
+    yay -S --noconfirm --needed \
+      nvidia \
+      nvidia-utils \
+      lib32-nvidia-utils \
+      nvidia-dkms
+    
+    print_success "NVIDIA drivers installed"
+    
+    print_info "Installing NVIDIA additional tools..."
+    
+    yay -S --noconfirm --needed \
+      cuda \
+      cudnn
+    
+    print_success "NVIDIA additional tools installed"
+    print_success "NVIDIA drivers installation completed!"
+    ;;
+    
+  intel)
+    print_section "Installing Intel GPU Drivers"
+    
+    print_info "Installing Intel GPU drivers..."
+    
+    yay -S --noconfirm --needed \
+      intel-media-driver \
+      libva-intel-driver \
+      lib32-libva-intel-driver \
+      vulkan-intel \
+      lib32-vulkan-intel \
+      mesa \
+      lib32-mesa
+    
+    print_success "Intel GPU drivers installed"
+    print_success "Intel drivers installation completed!"
+    ;;
+    
+  *)
+    echo -e "${RED}error:${NC} Unknown GPU vendor: $gpu_vendor" >&2
+    exit 1
+    ;;
+esac
+
+{{- else }}
+
+print_section "GPU Drivers Installation"
+print_info "Skipping GPU drivers installation (not configured)"
+
+{{- end }}
+
+{{ end -}}

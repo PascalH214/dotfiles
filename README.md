@@ -92,7 +92,9 @@ Setup scripts run automatically when their source files change:
 - `run_onchange_10_install_packages_ubuntu.sh.tmpl` - Install Ubuntu packages
 - `run_onchange_15_install_packages_npm.sh.tmpl` - Install NPM packages
 - `run_onchange_20_bitwarden.sh.tmpl` - Bitwarden CLI setup
+- `run_onchange_22_install_amd_drivers_arch.sh.tmpl` - GPU drivers installation (AMD, NVIDIA, Intel)
 - `run_onchange_25_configure_ansible.sh.tmpl` - Run all Ansible playbooks
+- `run_onchange_25_configure_arch.sh.tmpl` - Arch Linux specific configuration
 - `run_onchange_30_code_extensions.sh.tmpl` - Install VS Code extensions
 
 ## Configuration Files
@@ -127,6 +129,17 @@ Setup scripts run automatically when their source files change:
   - Keybindings for applications, layout, multimedia, tools, and workspace management
   - Animation and styling configuration
   - Input and environment variables
+
+### GPU Drivers
+
+GPU driver installation is configured via the `gpu_vendor` setting during chezmoi initialization:
+
+- **AMD (AMDGPU)**: Installs amdgpu-dkms, Vulkan, Mesa, ROCm, and radeontop monitoring tool
+- **NVIDIA**: Installs nvidia drivers, cuda, and cudnn
+- **Intel**: Installs Intel media driver, Vulkan, and Mesa
+- **None**: Skip GPU driver installation
+
+The script is run automatically during `chezmoi apply` if a GPU vendor is selected.
 
 ### System Tools
 

@@ -30,6 +30,7 @@
 {{- $install_media_related_pkgs := and $is_gui (promptBoolOnce . "install_media_related_pkgs" "Do you want to install media related packages?" true) -}}
 {{- $install_timeshift := promptBoolOnce . "install_timeshift" "Do you want to install timeshift and related packages?" true -}}
 {{- $location := and $install_hyprland (promptStringOnce . "location" "What is your (not exact) location? (needed for weather)") -}}
+{{- $gpu_vendor := and $is_gui (promptChoiceOnce . "gpu_vendor" "Which GPU vendor do you have?" (list "none" "amd" "nvidia" "intel") "none") -}}
 
 {{/*
 =======================================================================
@@ -134,6 +135,7 @@ install_ly = {{ $install_ly }}
 install_kde_apps = {{ $install_kde_apps }}
 install_media_related_pkgs = {{ $install_media_related_pkgs }}
 install_timeshift = {{ $install_timeshift }}
+gpu_vendor = {{ $gpu_vendor | quote }}
 
 # Combined package lists
 {{- if eq $os "arch-linux" }}
