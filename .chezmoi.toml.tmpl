@@ -32,6 +32,10 @@
 {{- $location := and $install_hyprland (promptStringOnce . "location" "What is your (not exact) location? (needed for weather)") -}}
 {{- $gpu_vendor := and $is_gui (promptChoiceOnce . "gpu_vendor" "Which GPU vendor do you have?" (list "none" "amd" "nvidia" "intel") "none") -}}
 {{- $install_gaming := and $is_gui (promptBoolOnce . "install_gaming" "Do you want to set up gaming tools and optimizations?" false) -}}
+{{- $install_gui_apps := and $is_gui (promptBoolOnce . "install_gui_apps" "Do you want to install GUI applications (VS Code, Chrome, Firefox, etc.)?" true) -}}
+{{- $install_dev_tools := promptBoolOnce . "install_dev_tools" "Do you want to install development tools (Docker, Maven, Terraform, Ansible)?" true -}}
+{{- $install_tui_apps := promptBoolOnce . "install_tui_apps" "Do you want to install TUI applications (Yazi, Neovim, Tmux, etc.)?" true -}}
+{{- $install_fonts := and $is_gui (promptBoolOnce . "install_fonts" "Do you want to install font packages?" true) -}}
 
 {{/*
 =======================================================================
@@ -51,29 +55,40 @@ NOTE: All OS-specific package lists should be defined here.
   "npm"
 ) -}}
 
-{{- $_ := set $pkgs "tui_arch" (list
-  "yazi" "neovim" "tmux" "tmuxinator" "bluetui" "fzf" "impala" "ncpamixer" "tree" "btop" "nudoku" "amdgpu_top"
-) -}}
+{{- $tui_arch_packages := list "yazi" "neovim" "tmux" "tmuxinator" "bluetui" "fzf" "impala" "ncpamixer" "tree" "btop" "nudoku" "amdgpu_top" -}}
+{{- if $install_tui_apps -}}
+{{-   $_ := set $pkgs "tui_arch" $tui_arch_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "tui_arch" (list) -}}
+{{- end -}}
 {{- $_ := set $pkgs "tui_ubuntu" (list) -}}
 {{- if $install_ly -}}
 {{-   $_ := set $pkgs "tui_arch" (append ($pkgs.tui_arch) "ly") -}}
 {{-   $_ := set $pkgs "tui_ubuntu" (append ($pkgs.tui_ubuntu) "ly") -}}
 {{- end -}}
 
-{{- $_ := set $pkgs "dev_arch" (list
-  "docker" "docker-compose" "maven" "npm" "terraform" "ansible"
-) -}}
+{{- $dev_arch_packages := list "docker" "docker-compose" "maven" "npm" "terraform" "ansible" -}}
+{{- if $install_dev_tools -}}
+{{-   $_ := set $pkgs "dev_arch" $dev_arch_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "dev_arch" (list) -}}
+{{- end -}}
 {{- $_ := set $pkgs "dev_ubuntu" (list) -}}
 
-{{- $_ := set $pkgs "gui_arch" (list
-  "visual-studio-code-bin" "google-chrome" "firefox" "bitwarden" "discord"
-  "libreoffice-still" "thunderbird" "veracrypt" "intellija-idea-ultimate-edition"
-) -}}
+{{- $gui_arch_packages := list "visual-studio-code-bin" "google-chrome" "firefox" "bitwarden" "discord" "libreoffice-still" "thunderbird" "veracrypt" "intellija-idea-ultimate-edition" -}}
+{{- if $install_gui_apps -}}
+{{-   $_ := set $pkgs "gui_arch" $gui_arch_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "gui_arch" (list) -}}
+{{- end -}}
 {{- $_ := set $pkgs "gui_ubuntu" (list) -}}
 
-{{- $_ := set $pkgs "fonts_arch" (list
-  "ttf-0xproto-nerd" "ttf-jetbrains-mono-nerd" "noto-fonts-emoji"
-) -}}
+{{- $fonts_arch_packages := list "ttf-0xproto-nerd" "ttf-jetbrains-mono-nerd" "noto-fonts-emoji" -}}
+{{- if $install_fonts -}}
+{{-   $_ := set $pkgs "fonts_arch" $fonts_arch_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "fonts_arch" (list) -}}
+{{- end -}}
 {{- $_ := set $pkgs "fonts_ubuntu" (list) -}}
 
 {{- $_ := set $pkgs "hyprland_arch" (list
@@ -138,6 +153,10 @@ install_media_related_pkgs = {{ $install_media_related_pkgs }}
 install_timeshift = {{ $install_timeshift }}
 gpu_vendor = {{ $gpu_vendor | quote }}
 install_gaming = {{ $install_gaming }}
+install_gui_apps = {{ $install_gui_apps }}
+install_dev_tools = {{ $install_dev_tools }}
+install_tui_apps = {{ $install_tui_apps }}
+install_fonts = {{ $install_fonts }}
 
 # Combined package lists
 {{- if eq $os "arch-linux" }}

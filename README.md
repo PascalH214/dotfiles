@@ -51,6 +51,20 @@ Or if you already have a local copy:
 chezmoi init --apply --source /path/to/dotfiles
 ```
 
+The setup will prompt you to customize several options:
+- **OS**: Arch Linux or Ubuntu
+- **Headless**: Whether your system has a GUI
+- **Desktop Environment**: Hyprland setup (GUI systems)
+- **Display Manager**: ly display manager (GUI systems)
+- **Packaging**: KDE apps, Media tools, Timeshift
+- **GPU Vendor**: AMD, NVIDIA, Intel, or None
+- **Optional Packages**:
+  - GUI Applications (VS Code, Chrome, Firefox, etc.)
+  - Development Tools (Docker, Maven, Terraform, Ansible)
+  - TUI Applications (Neovim, Tmux, Yazi, etc.)
+  - Font packages
+- **Gaming**: Gaming tools and kernel optimizations (optional)
+
 1. Apply the configuration:
 
 ```bash
