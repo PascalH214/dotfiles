@@ -27,9 +27,40 @@
         group: root
       notify: Restart iwd service
 
+    - name: Ensure systemd-resolved drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/resolved.conf.d
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Configure systemd-resolved DNS (fallback only)
+      ansible.builtin.copy:
+        dest: /etc/systemd/resolved.conf.d/iwd-dns.conf
+        content: |
+          [Resolve]
+          FallbackDNS=1.1.1.1 8.8.8.8
+        mode: '0644'
+        owner: root
+        group: root
+      notify: Restart systemd-resolved
+
+    - name: Ensure systemd-resolved is enabled and running
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: started
+        enabled: true
+
   handlers:
     - name: Restart iwd service
       ansible.builtin.systemd:
         name: iwd
+        state: restarted
+        enabled: true
+
+    - name: Restart systemd-resolved
+      ansible.builtin.systemd:
+        name: systemd-resolved
         state: restarted
         enabled: true
