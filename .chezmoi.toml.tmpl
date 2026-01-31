@@ -36,6 +36,7 @@
 {{- $install_dev_tools := promptBoolOnce . "install_dev_tools" "Do you want to install development tools (Docker, Maven, Terraform, Ansible)?" true -}}
 {{- $install_tui_apps := promptBoolOnce . "install_tui_apps" "Do you want to install TUI applications (Yazi, Neovim, Tmux, etc.)?" true -}}
 {{- $install_fonts := and $is_gui (promptBoolOnce . "install_fonts" "Do you want to install font packages?" true) -}}
+{{- $install_printers_scanners := promptBoolOnce . "install_printers_scanners" "Do you want to install and configure printers and scanners (CUPS and SANE)?" true -}}
 
 {{/*
 =======================================================================
@@ -158,6 +159,7 @@ install_gui_apps = {{ $install_gui_apps }}
 install_dev_tools = {{ $install_dev_tools }}
 install_tui_apps = {{ $install_tui_apps }}
 install_fonts = {{ $install_fonts }}
+install_printers_scanners = {{ $install_printers_scanners }}
 
 # Combined package lists
 {{- if eq $os "arch-linux" }}

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+install_yay_packages() {
+  # The first argument is the Category Label
+  local label="$1"
+  # Shift moves arguments to the left, so $2 becomes $1, etc.
+  shift
+  # Now $@ contains only the package names
+  local pkgs=("$@")
+
+  if ! command -v yay >/dev/null 2>&1; then
+    echo -e "${RED}error:${NC} yay not installed" >&2
+    return 1
+  fi
+
+  if [ "${#pkgs[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo -e "${BLUE}======================================${NC}"
+  # Using the dynamic label here
+  echo -e "${BOLD}Installing ${label}:${NC}"
+  for pkg in "${pkgs[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo -e "${BLUE}======================================${NC}\n"
+
+  yay -S --noconfirm --needed "${pkgs[@]}"
+
+  echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
+}
+
+{{ if eq .os "arch-linux" -}}
+
+{{ if .install_printers_scanners }}
+
+# Install CUPS for printing
+install_yay_packages "CUPS (Printing)" cups cups-pdf cups-filters ghostscript gsfonts
+
+# Install SANE and related packages for scanning
+install_yay_packages "SANE (Scanning)" sane sane-airscan ipp-usb
+
+# Optional GUI frontends for scanning
+{{ if not .headless -}}
+install_yay_packages "Scanner Frontends" simple-scan skanlite
+{{- end }}
+
+{{ end -}}
+
+{{ end -}}

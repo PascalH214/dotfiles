@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+print_begin() {
+  local label="$1"
+
+  echo -e "${BLUE}======================================${NC}"
+  # Using the dynamic label here
+  echo -e "${BOLD}Configure ${label}:${NC}"
+  echo -e "${BLUE}======================================${NC}\n"
+}
+
+print_end() {
+  local label="$1"
+  echo -e "\n${GREEN}✓ Configure ${label} finished${NC}\n"
+}
+
+{{ if eq .os "arch-linux" -}}
+
+{{ if .install_printers_scanners }}
+
+print_begin "CUPS (Printing)"
+
+# Enable and start CUPS service
+sudo systemctl enable cups.service
+sudo systemctl start cups.service
+
+# Add current user to lp group for printer management
+if ! id -nG "$USER" | grep -qw lp; then
+  sudo usermod -aG lp "$USER"
+  echo -e "${BLUE}→ Added $USER to lp group. Log out and log back in for this to take effect.${NC}"
+else
+  echo -e "${BLUE}→ $USER is already in lp group.${NC}"
+fi
+
+print_end "CUPS (Printing)"
+
+print_begin "SANE (Scanning)"
+
+# Enable and start SANE saned socket
+sudo systemctl enable saned.socket
+sudo systemctl start saned.socket
+
+# Enable and start ipp-usb service for IPP over USB
+sudo systemctl enable ipp-usb.service
+sudo systemctl start ipp-usb.service
+
+# Add current user to lp group for scanner access
+if ! id -nG "$USER" | grep -qw lp; then
+  sudo usermod -aG lp "$USER"
+  echo -e "${BLUE}→ Added $USER to lp group for scanner access. Log out and log back in for this to take effect.${NC}"
+else
+  echo -e "${BLUE}→ $USER is already in lp group.${NC}"
+fi
+
+print_end "SANE (Scanning)"
+
+{{ end -}}
+
+{{ end -}}

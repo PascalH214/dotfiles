@@ -64,6 +64,7 @@ The setup will prompt you to customize several options:
   - Development Tools (Docker, Maven, Terraform, Ansible)
   - TUI Applications (Neovim, Tmux, Yazi, etc.)
   - Font packages
+  - Printers & Scanners (CUPS, SANE)
 - **Gaming**: Gaming tools and kernel optimizations (optional)
 
 1. Apply the configuration:
@@ -110,6 +111,8 @@ Setup scripts run automatically when their source files change:
 - `run_onchange_22_install_amd_drivers_arch.sh.tmpl` - GPU drivers installation (AMD, NVIDIA, Intel)
 - `run_onchange_25_configure_ansible.sh.tmpl` - Run all Ansible playbooks
 - `run_onchange_25_configure_arch.sh.tmpl` - Arch Linux specific configuration
+- `run_onchange_27_install_printers_scanners_arch.sh.tmpl` - CUPS and SANE installation
+- `run_onchange_28_configure_printers_scanners_arch.sh.tmpl` - Printers and scanners configuration
 - `run_onchange_28_install_gaming_arch.sh.tmpl` - Gaming setup and optimizations
 - `run_onchange_30_code_extensions.sh.tmpl` - Install VS Code extensions
 
