@@ -75,6 +75,13 @@ systemctl --user enable ssh-agent.service
 systemctl --user start ssh-agent.service
 
 print_end "SSH Agent (systemd user service)"
+
+print_begin "Syncthing"
+
+systemctl --user daemon-reload
+systemctl --user enable --now syncthing.service
+
+print_end "Syncthing"
 {{- if .install_timeshift }}
 print_begin "grub-btrfsd & teimshift-autosnap"
 
