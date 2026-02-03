@@ -40,6 +40,7 @@
         dest: /etc/systemd/resolved.conf.d/iwd-dns.conf
         content: |
           [Resolve]
+          DNS=192.168.178.221 1.1.1.1 8.8.8.8
           FallbackDNS=1.1.1.1 8.8.8.8
         mode: '0644'
         owner: root
