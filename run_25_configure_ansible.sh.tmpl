@@ -47,10 +47,6 @@ fi
 # Get the chezmoi source directory
 ANSIBLE_DIR="{{ .chezmoi.sourceDir }}/ansible_playbooks"
 
-# Ask for password once
-read -sp "Enter sudo password: " BECOME_PASSWORD
-echo ""
-
 # Define playbooks to run
 declare -a PLAYBOOKS=(
   "Configure system timezone:${ANSIBLE_DIR}/timezone.yml"
@@ -60,22 +56,48 @@ declare -a PLAYBOOKS=(
 
 )
 
-# Track failures
+# Track failures and skipped
 failed=0
+skipped=0
+
+# Ask if user wants to proceed
+read -p "Do you want to configure Ansible playbooks? (y/n): " -n 1 -r
+echo
+if ! [[ $REPLY =~ ^[Yy]$ ]]; then
+  echo -e "${YELLOW}Ansible configuration cancelled${NC}\n"
+  exit 0
+fi
+
+# Ask for password once
+read -sp "Enter sudo password: " BECOME_PASSWORD
+echo ""
 
 # Run all playbooks
 for playbook_entry in "${PLAYBOOKS[@]}"; do
   IFS=':' read -r playbook_name playbook_file <<< "${playbook_entry}"
-  run_ansible_playbook "${playbook_name}" "${playbook_file}" || ((failed++))
+  
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    run_ansible_playbook "${playbook_name}" "${playbook_file}" || ((failed++))
+  else
+    echo -e "${YELLOW}⊘ ${playbook_name} skipped${NC}\n"
+    ((skipped++))
+  fi
 done
 
 echo -e "${BLUE}======================================${NC}"
 if [ ${failed} -eq 0 ]; then
-  echo -e "${GREEN}✓ All Ansible configurations completed successfully${NC}"
+  if [ ${skipped} -eq 0 ]; then
+    echo -e "${GREEN}✓ All Ansible configurations completed successfully${NC}"
+  else
+    echo -e "${GREEN}✓ Ansible configurations completed (${skipped} skipped)${NC}"
+  fi
   echo -e "${BLUE}======================================${NC}\n"
   exit 0
 else
   echo -e "${RED}✗ ${failed} Ansible configuration(s) failed${NC}"
+  if [ ${skipped} -gt 0 ]; then
+    echo -e "${YELLOW}(${skipped} playbooks skipped)${NC}"
+  fi
   echo -e "${BLUE}======================================${NC}\n"
   exit 1
 fi
