@@ -20,7 +20,7 @@
 {{- $bw_server_url := promptStringOnce . "bw_server_url" "Bitwarden server URL (self-hosted)" -}}
 {{- $bw_ssh_key := promptStringOnce . "bw_ssh_key" "Bitwarden SSH key item name (leave empty to skip)" -}}
 {{- $git_username := promptStringOnce . "git_username" "What should your git username be?" -}}
-{{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "ubuntu") "arch-linux" -}}
+{{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux") "arch-linux" -}}
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
 {{- $is_gui := not $headless -}}
 
@@ -53,9 +53,6 @@ NOTE: All OS-specific package lists should be defined here.
   "ripgrep" "bat" "7zip" "rar" "zip" "unzip" "rsync" "rclone" "translate-shell" "wttrbar" "npm" "syncthing"
   "lsd"
 ) -}}
-{{- $_ := set $pkgs "cli_ubuntu" (list
-  "npm"
-) -}}
 
 {{- $tui_arch_packages := list "yazi" "neovim" "tmux" "tmuxinator" "bluetui" "fzf" "impala" "ncpamixer" "tree" "btop" "nudoku" "amdgpu_top" -}}
 {{- if $install_tui_apps -}}
@@ -63,10 +60,8 @@ NOTE: All OS-specific package lists should be defined here.
 {{- else -}}
 {{-   $_ := set $pkgs "tui_arch" (list) -}}
 {{- end -}}
-{{- $_ := set $pkgs "tui_ubuntu" (list) -}}
 {{- if $install_ly -}}
 {{-   $_ := set $pkgs "tui_arch" (append ($pkgs.tui_arch) "ly") -}}
-{{-   $_ := set $pkgs "tui_ubuntu" (append ($pkgs.tui_ubuntu) "ly") -}}
 {{- end -}}
 
 {{- $dev_arch_packages := list "docker" "docker-compose" "maven" "npm" "terraform" "ansible" -}}
@@ -75,7 +70,6 @@ NOTE: All OS-specific package lists should be defined here.
 {{- else -}}
 {{-   $_ := set $pkgs "dev_arch" (list) -}}
 {{- end -}}
-{{- $_ := set $pkgs "dev_ubuntu" (list) -}}
 
 {{- $gui_arch_packages := list "visual-studio-code-bin" "google-chrome" "firefox" "bitwarden" "discord" "libreoffice-still" "thunderbird" "veracrypt" "intellija-idea-ultimate-edition" -}}
 {{- if $install_gui_apps -}}
@@ -83,7 +77,6 @@ NOTE: All OS-specific package lists should be defined here.
 {{- else -}}
 {{-   $_ := set $pkgs "gui_arch" (list) -}}
 {{- end -}}
-{{- $_ := set $pkgs "gui_ubuntu" (list) -}}
 
 {{- $fonts_arch_packages := list "ttf-0xproto-nerd" "ttf-jetbrains-mono-nerd" "noto-fonts-emoji" -}}
 {{- if $install_fonts -}}
@@ -91,39 +84,31 @@ NOTE: All OS-specific package lists should be defined here.
 {{- else -}}
 {{-   $_ := set $pkgs "fonts_arch" (list) -}}
 {{- end -}}
-{{- $_ := set $pkgs "fonts_ubuntu" (list) -}}
 
 {{- $_ := set $pkgs "hyprland_arch" (list
   "hyprland" "hyprlock" "hyprshot" "hyprcursor" "rofi" "waybar" "wpaperd" "dunst"
   "rose-pine-gtk-theme-full" "bluez" "bluez-utils" "brightnessctl" "pipewire"
   "pipewire-pulse" "wireplumber" "rose-pine-hyprcursor" "dua-cli"
 ) -}}
-{{- $_ := set $pkgs "hyprland_ubuntu" (list) -}}
 
 {{- $_ := set $pkgs "kde_arch" (list
   "qt5ct" "qt6ct-kde" "archlinux-xdg-menu" "xdg-desktop-portal-hyprland"
   "dolphin" "ark" "okular" "kdialog" "kcalc" "keditfiletype" "isoimagewriter"
   "kvantum"
 ) -}}
-{{- $_ := set $pkgs "kde_ubuntu" (list) -}}
 
 {{- $_ := set $pkgs "media_arch" (list
   "feishin-bin" "ffmpeg" "ffmpegthumbnailer" "tumbler" "vlc" "vlc-plugins-all"
 ) -}}
-{{- $_ := set $pkgs "media_ubuntu" (list) -}}
 
 {{- $_ := set $pkgs "timeshift_arch" (list
   "timeshift" "grub-btrfs" "timeshift-autosnap"
 ) -}}
-{{- $_ := set $pkgs "timeshift_ubuntu" (list) -}}
 
 {{- $_ := set $pkgs "other_arch" (list) -}}
-{{- $_ := set $pkgs "other_ubuntu" (list) -}}
 {{- if not $headless -}}
 {{-   $other_arch_packages := list "naps2" "system-config-printer" "cups" "selectdefaultapplication" -}}
 {{-   $_ := set $pkgs "other_arch" (concat ($pkgs.other_arch) $other_arch_packages) -}}
-{{-   $other_ubuntu_packages := list "naps2" "system-config-printer" "cups" -}}
-{{- $_ := set $pkgs "other_ubuntu" (concat ($pkgs.other_ubuntu) $other_ubuntu_packages) -}}
 {{- end -}}
 
 {{- $_ := set $pkgs "npm" (list
@@ -174,17 +159,5 @@ pkgs_kde = {{ get $pkgs "kde_arch" | toToml }}
 pkgs_media = {{ get $pkgs "media_arch" | toToml }}
 pkgs_timeshift = {{ get $pkgs "timeshift_arch" | toToml }}
 pkgs_other = {{ get $pkgs "other_arch" | toToml }}
-pkgs_npm = {{ get $pkgs "npm" | toToml }}
-{{- else if eq $os "ubuntu" }}
-pkgs_cli = {{ get $pkgs "cli_ubuntu" | toToml }}
-pkgs_tui = {{ get $pkgs "tui_ubuntu" | toToml }}
-pkgs_dev = {{ get $pkgs "dev_ubuntu" | toToml }}
-pkgs_gui = {{ get $pkgs "gui_ubuntu" | toToml }}
-pkgs_fonts = {{ get $pkgs "fonts_ubuntu" | toToml }}
-pkgs_hyprland = {{ get $pkgs "hyprland_ubuntu" | toToml }}
-pkgs_kde = {{ get $pkgs "kde_ubuntu" | toToml }}
-pkgs_media = {{ get $pkgs "media_ubuntu" | toToml }}
-pkgs_timeshift = {{ get $pkgs "timeshift_ubuntu" | toToml }}
-pkgs_other = {{ get $pkgs "other_ubuntu" | toToml }}
 pkgs_npm = {{ get $pkgs "npm" | toToml }}
 {{- end }}
