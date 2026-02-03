@@ -1,6 +1,7 @@
 alias c='clear && if [[ $(which fastfetch) ]]; then fastfetch --config ~/.config/fastfetch/config.jsonc; fi;'
 alias ssh='TERM=xterm ssh'
 alias svim='sudoedit'
+alias ls='lsd'
 alias ecmp='f(){ 
   local file
   if [ -f docker-compose.yml ]; then
