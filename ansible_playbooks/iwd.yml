@@ -4,6 +4,19 @@
   connection: local
   become: true
   tasks:
+    - name: Disable NetworkManager if present
+      ansible.builtin.systemd:
+        name: NetworkManager
+        state: stopped
+        enabled: false
+      ignore_errors: true
+
+    - name: Disable wpa_supplicant service
+      ansible.builtin.systemd:
+        name: wpa_supplicant
+        state: stopped
+        enabled: false
+      ignore_errors: true
     - name: Ensure /etc/iwd directory exists
       ansible.builtin.file:
         path: /etc/iwd
@@ -18,10 +31,20 @@
         content: |
           [General]
           EnableNetworkConfiguration=true
+          # Roaming threshold to prevent excessive roaming
+          RoamThreshold=-65
+          # Use stronger signal requirements
+          RSSIThreshold=-85
 
           [Network]
           EnableIPv6=true
           NameResolvingService=systemd
+
+          [Scan]
+          # Disable periodic background scans that cause disconnects
+          DisablePeriodicScan=false
+          # Increase scan interval to reduce RF interference
+          BackgroundScanPeriod=300
         mode: '0644'
         owner: root
         group: root
@@ -53,6 +76,51 @@
         state: started
         enabled: true
 
+    - name: Ensure /etc/modprobe.d directory exists
+      ansible.builtin.file:
+        path: /etc/modprobe.d
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Disable WiFi power saving for Intel iwlwifi driver
+      ansible.builtin.copy:
+        dest: /etc/modprobe.d/iwlwifi.conf
+        content: |
+          # Disable power saving to prevent WiFi disconnections
+          options iwlwifi power_save=0
+          options iwldvm force_cam=1
+        mode: '0644'
+        owner: root
+        group: root
+      notify: Regenerate initramfs
+
+    - name: Disable WiFi power saving for MediaTek MT792x driver
+      ansible.builtin.copy:
+        dest: /etc/modprobe.d/mt792x.conf
+        content: |
+          # Disable power saving for MediaTek MT7922/MT7921 to prevent disconnections
+          options mt7921e disable_aspm=1
+          options cfg80211 ieee80211_regdom=DE
+        mode: '0644'
+        owner: root
+        group: root
+      notify: Regenerate initramfs
+
+    - name: Disable WiFi power saving for other drivers
+      ansible.builtin.copy:
+        dest: /etc/modprobe.d/wireless-power-save.conf
+        content: |
+          # Disable power saving globally for wireless devices
+          options cfg80211 ieee80211_regdom=DE
+          # Disable runtime PM for PCI devices to prevent WiFi dropout
+          options pciehp pcie_ports=native
+        mode: '0644'
+        owner: root
+        group: root
+      notify: Regenerate initramfs
+
   handlers:
     - name: Restart iwd service
       ansible.builtin.systemd:
@@ -65,3 +133,7 @@
         name: systemd-resolved
         state: restarted
         enabled: true
+
+    - name: Regenerate initramfs
+      ansible.builtin.command: mkinitcpio -P
+      changed_when: true

@@ -51,7 +51,7 @@ NOTE: All OS-specific package lists should be defined here.
 {{- $_ := set $pkgs "cli_arch" (list
   "kitty" "fastfetch" "oh-my-posh" "git" "man-db" "man-pages" "less" "zoxide" "fd"
   "ripgrep" "bat" "7zip" "rar" "zip" "unzip" "rsync" "rclone" "translate-shell" "wttrbar" "npm" "syncthing"
-  "lsd" "entr" "git-filter-repo"
+  "lsd" "entr" "git-filter-repo" "iw" "wireless_tools"
 ) -}}
 
 {{- $tui_arch_packages := list "yazi" "neovim" "tmux" "tmuxinator" "bluetui" "fzf" "impala" "ncpamixer" "tree" "btop" "nudoku" "amdgpu_top" -}}
@@ -71,7 +71,7 @@ NOTE: All OS-specific package lists should be defined here.
 {{-   $_ := set $pkgs "dev_arch" (list) -}}
 {{- end -}}
 
-{{- $gui_arch_packages := list "visual-studio-code-bin" "google-chrome" "firefox" "bitwarden" "discord" "libreoffice-still" "thunderbird" "veracrypt" "intellija-idea-ultimate-edition" -}}
+{{- $gui_arch_packages := list "visual-studio-code-bin" "google-chrome" "firefox" "bitwarden" "discord" "libreoffice-still" "thunderbird" "veracrypt" "intellij-idea-ultimate-edition" -}}
 {{- if $install_gui_apps -}}
 {{-   $_ := set $pkgs "gui_arch" $gui_arch_packages -}}
 {{- else -}}
