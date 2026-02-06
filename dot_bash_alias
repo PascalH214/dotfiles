@@ -1,6 +1,14 @@
-alias c='clear && if [[ $(which fastfetch) ]]; then fastfetch --config ~/.config/fastfetch/config.jsonc; fi;'
-alias ssh='TERM=xterm ssh'
 alias svim='sudoedit'
+alias cz='chezmoi'
+
+alias c='clear && if [[ $(which fastfetch) ]]; then fastfetch --config ~/.config/fastfetch/config.jsonc; fi;'
+
+alias ssh='TERM=xterm ssh'
+
+alias ls='lsd'
+alias ll='lsd -l'
+alias la='lsd -la'
+
 alias ecmp='f(){ 
   local file
   if [ -f docker-compose.yml ]; then
@@ -13,7 +21,3 @@ alias ecmp='f(){
   fi
   $EDITOR "$file"
 }; f'
-
-alias ls='lsd'
-alias ll='lsd -l'
-alias la='lsd -la'

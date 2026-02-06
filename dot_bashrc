@@ -3,6 +3,10 @@ source ~/.bash_alias
 
 fastfetch
 
+echo -e "Don't forget about:"
+echo -e "\033[38;2;114;135;253mman (1)\033[0m    - an interface to the system reference manuals"
+echo -e "\033[38;2;114;135;253mwhatis (1)\033[0m - display one-line manual page descriptions\n"
+
 set -o vi
 
 if [[ $(which oh-my-posh) ]]; then
