@@ -58,17 +58,17 @@
         owner: root
         group: root
 
-    - name: Configure systemd-resolved DNS (fallback only)
-      ansible.builtin.copy:
-        dest: /etc/systemd/resolved.conf.d/iwd-dns.conf
-        content: |
-          [Resolve]
-          DNS=192.168.178.221 1.1.1.1 8.8.8.8
-          FallbackDNS=1.1.1.1 8.8.8.8
-        mode: '0644'
-        owner: root
-        group: root
-      notify: Restart systemd-resolved
+    # - name: Configure systemd-resolved DNS (fallback only)
+    #   ansible.builtin.copy:
+    #     dest: /etc/systemd/resolved.conf.d/iwd-dns.conf
+    #     content: |
+    #       [Resolve]
+    #       DNS=192.168.178.221 1.1.1.1 8.8.8.8
+    #       FallbackDNS=192.168.178.221 1.1.1.1 8.8.8.8
+    #     mode: '0644'
+    #     owner: root
+    #     group: root
+    #   notify: Restart systemd-resolved
 
     - name: Ensure systemd-resolved is enabled and running
       ansible.builtin.systemd:
