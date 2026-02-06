@@ -13,7 +13,8 @@ return {
 					"terraformls",
 					"yamlls",
           "ansiblels",
-          "ast_grep"
+          "ast_grep",
+          "hyprls"
 				},
 			}
 		end,
