@@ -55,7 +55,7 @@ NOTE: All OS-specific package lists should be defined here.
   "lsd" "entr" "git-filter-repo" "iw" "wireless_tools" "rocm-smi-lib" "openrazer-daemon"
 -}}
 {{- if $install_exercism -}}
-{{-   $_ := set $pkgs "cli_arch" (concat $cli_arch_packages (list "exercism" "bats")) -}}
+{{-   $_ := set $pkgs "cli_arch" (concat $cli_arch_packages (list "exercism" "bats-core")) -}}
 {{- else -}}
 {{-   $_ := set $pkgs "cli_arch" $cli_arch_packages -}}
 {{- end -}}
