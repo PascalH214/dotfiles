@@ -48,19 +48,25 @@ if ! getent group docker >/dev/null; then
   sudo groupadd docker
   info "Created docker group."
 else
-  warn "Docker group already exists."
+  echo "Docker group already exists."
 fi
 
 if ! id -nG "$USER" | grep -qw docker; then
   sudo usermod -aG docker "$USER"
   info "Added $USER to docker group. You may need to log out and log back in for this to take effect."
 else
-  warn "User $USER is already in the docker group."
+  echo "User $USER is already in the docker group."
 fi
 
 sudo systemctl enable --now docker
 
 print_end "docker"
+
+print_begin "openrazer-daemon"
+
+sudo gpasswd -a $USER openrazer
+
+print_end "openrazer-daemon"
 
 print_begin "bluetooth"
 
