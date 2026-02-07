@@ -37,6 +37,7 @@
 {{- $install_tui_apps := promptBoolOnce . "install_tui_apps" "Do you want to install TUI applications (Yazi, Neovim, Tmux, etc.)?" true -}}
 {{- $install_fonts := and $is_gui (promptBoolOnce . "install_fonts" "Do you want to install font packages?" true) -}}
 {{- $install_printers_scanners := promptBoolOnce . "install_printers_scanners" "Do you want to install and configure printers and scanners (CUPS and SANE)?" true -}}
+{{- $install_exercism := promptBoolOnce . "install_exercism" "Do you want to install exercism CLI?" false -}}
 
 {{/*
 =======================================================================
@@ -48,11 +49,16 @@ NOTE: All OS-specific package lists should be defined here.
 
 {{- $pkgs := dict -}}
 
-{{- $_ := set $pkgs "cli_arch" (list
+{{- $cli_arch_packages := list
   "kitty" "fastfetch" "oh-my-posh" "git" "man-db" "man-pages" "less" "zoxide" "fd"
   "ripgrep" "bat" "7zip" "rar" "zip" "unzip" "rsync" "rclone" "translate-shell" "wttrbar" "npm" "syncthing"
   "lsd" "entr" "git-filter-repo" "iw" "wireless_tools" "rocm-smi-lib" "openrazer-daemon"
-) -}}
+-}}
+{{- if $install_exercism -}}
+{{-   $_ := set $pkgs "cli_arch" (concat $cli_arch_packages (list "exercism" "bats")) -}}
+{{- else -}}
+{{-   $_ := set $pkgs "cli_arch" $cli_arch_packages -}}
+{{- end -}}
 
 {{- $tui_arch_packages := list "yazi" "neovim" "tmux" "tmuxinator" "bluetui" "fzf" "impala" "ncpamixer" "tree" "btop" "nudoku" "amdgpu_top" -}}
 {{- if $install_tui_apps -}}
@@ -146,6 +152,7 @@ install_dev_tools = {{ $install_dev_tools }}
 install_tui_apps = {{ $install_tui_apps }}
 install_fonts = {{ $install_fonts }}
 install_printers_scanners = {{ $install_printers_scanners }}
+install_exercism = {{ $install_exercism }}
 
 # Combined package lists
 {{- if eq $os "arch-linux" }}
