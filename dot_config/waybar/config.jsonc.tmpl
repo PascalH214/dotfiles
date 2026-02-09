@@ -25,7 +25,9 @@
     "modules-right": [
       "custom/spacer1",
       "cpu",
+      "custom/cpu-temp",
       "custom/gpu",
+      "custom/gpu-temp",
       // "group/storage",
       "memory#ram",
       "memory#swap",
@@ -91,8 +93,15 @@
     },
 
     "custom/gpu": {
-      "exec": "cat /sys/class/hwmon/hwmon1/device/gpu_busy_percent",
-      "format": " {}%",
+      "exec": "~/.config/waybar/scripts/rocm-gpu.sh usage",
+      "format": "󰢮 {}%",
+      "return-type": "",
+      "interval": 4
+    },
+
+    "custom/gpu-temp": {
+      "exec": "~/.config/waybar/scripts/rocm-gpu.sh temp",
+      "format": " {}°C",
       "return-type": "",
       "interval": 4
     },
@@ -148,11 +157,18 @@
 
     "cpu": {
       "interval": 4,
-      "format": " {usage}%",
+      "format": " {usage}%",
       "states": {
         "warning": 80,
         "critical": 95
       }
+    },
+
+    "custom/cpu-temp": {
+      "exec": "~/.config/waybar/scripts/cpu-temp.sh",
+      "format": " {}°C",
+      "return-type": "",
+      "interval": 4
     },
 
     "hyprland/language": {

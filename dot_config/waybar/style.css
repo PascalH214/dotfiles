@@ -104,7 +104,9 @@
 #waybar.main #custom-weather,
 #waybar.main #custom-weather,
 #waybar.main #custom-battery,
+#waybar.main #custom-cpu-temp,
 #waybar.main #custom-gpu,
+#waybar.main #custom-gpu-temp,
 #waybar.main #keyboard-state,
 #waybar.main #network,
 #waybar.main #battery,
@@ -140,6 +142,8 @@
 /* {{{ */
 #waybar.main #custom-nvidia,
 #waybar.main #custom-gpu,
+#waybar.main #custom-gpu-temp,
+#waybar.main #custom-cpu-temp,
 #waybar.main #cpu,
 #waybar.main #temperature,
 #waybar.main #memory.ram,
