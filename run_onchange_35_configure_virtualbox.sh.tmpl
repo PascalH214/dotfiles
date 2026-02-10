@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Define colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+{{ if .install_virtualbox -}}
+
+echo -e "${BLUE}======================================${NC}"
+echo -e "${BOLD}Configuring VirtualBox:${NC}"
+echo -e "${BLUE}======================================${NC}\n"
+
+# Add current user to vboxusers group
+if ! groups "$USER" | grep -q vboxusers; then
+  echo -e "${BLUE}->${NC} Adding $USER to vboxusers group..."
+  sudo usermod -aG vboxusers "$USER"
+  echo -e "${GREEN}✓${NC} User added to vboxusers group"
+  echo -e "${BOLD}Note:${NC} You may need to log out and log back in for group changes to take effect."
+else
+  echo -e "${GREEN}✓${NC} $USER is already in vboxusers group"
+fi
+
+# Load VirtualBox kernel modules
+echo -e "\n${BLUE}->${NC} Loading VirtualBox kernel modules..."
+if command -v modprobe >/dev/null 2>&1; then
+  echo -e "${BLUE}->${NC} Attempting to load vboxdrv module..."
+  sudo modprobe vboxdrv 2>/dev/null && echo -e "${GREEN}✓${NC} vboxdrv module loaded" || echo -e "${RED}⚠${NC} Could not load vboxdrv (may already be loaded)"
+fi
+
+if command -v systemctl >/dev/null 2>&1; then
+  # systemd-modules-load.service handles automatic loading at boot
+  if systemctl is-active --quiet systemd-modules-load.service; then
+    echo -e "${GREEN}✓${NC} Kernel modules will be loaded automatically (systemd-modules-load.service is active)"
+  else
+    echo -e "${RED}⚠${NC} systemd-modules-load.service is not active"
+  fi
+fi
+
+echo -e "\n${GREEN}✓ VirtualBox configuration complete.${NC}"
+echo -e "\n${BOLD}Next steps:${NC}"
+echo -e "  1. Reboot or run: newgrp vboxusers (to apply group changes)"
+echo -e "  2. Launch VirtualBox with: VirtualBox"
+echo -e "  3. See the wiki for more information: https://wiki.archlinux.org/title/VirtualBox\n"
+
+{{ else -}}
+
+echo -e "${BLUE}======================================${NC}"
+echo -e "${BOLD}VirtualBox:${NC} Not installed (skipped)"
+echo -e "${BLUE}======================================${NC}\n"
+
+{{ end -}}

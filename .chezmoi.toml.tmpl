@@ -38,6 +38,20 @@
 {{- $install_fonts := and $is_gui (promptBoolOnce . "install_fonts" "Do you want to install font packages?" true) -}}
 {{- $install_printers_scanners := promptBoolOnce . "install_printers_scanners" "Do you want to install and configure printers and scanners (CUPS and SANE)?" true -}}
 {{- $install_exercism := promptBoolOnce . "install_exercism" "Do you want to install exercism CLI?" false -}}
+{{- $install_virtualbox := and $is_gui (promptBoolOnce . "install_virtualbox" "Do you want to install VirtualBox?" false) -}}
+
+{{/* Autodetect kernel version */}}
+{{- $kernel_release := output "uname" "-r" | trim -}}
+{{- $virtualbox_kernel := "linux" -}}
+{{- if contains "linux-lts" $kernel_release -}}
+{{-   $virtualbox_kernel = "linux-lts" -}}
+{{- else if contains "linux-hardened" $kernel_release -}}
+{{-   $virtualbox_kernel = "linux-hardened" -}}
+{{- else if contains "linux-zen" $kernel_release -}}
+{{-   $virtualbox_kernel = "linux-zen" -}}
+{{- else if contains "linux-rt" $kernel_release -}}
+{{-   $virtualbox_kernel = "linux-rt" -}}
+{{- end -}}
 
 {{/*
 =======================================================================
@@ -117,6 +131,31 @@ NOTE: All OS-specific package lists should be defined here.
 {{-   $_ := set $pkgs "other_arch" (concat ($pkgs.other_arch) $other_arch_packages) -}}
 {{- end -}}
 
+{{- $virtualbox_base_packages := list "virtualbox" "virtualbox-guest-iso" -}}
+{{- $virtualbox_kernel_packages := list -}}
+{{- if eq $virtualbox_kernel "linux" -}}
+{{-   $virtualbox_kernel_packages = list "virtualbox-host-modules-arch" -}}
+{{- else if eq $virtualbox_kernel "linux-lts" -}}
+{{-   $virtualbox_kernel_packages = list "virtualbox-host-modules-lts" -}}
+{{- else -}}
+{{-   $kernel_headers := "" -}}
+{{-   if eq $virtualbox_kernel "linux-hardened" -}}
+{{-     $kernel_headers = "linux-hardened-headers" -}}
+{{-   else if eq $virtualbox_kernel "linux-zen" -}}
+{{-     $kernel_headers = "linux-zen-headers" -}}
+{{-   else if eq $virtualbox_kernel "linux-rt" -}}
+{{-     $kernel_headers = "linux-rt-headers" -}}
+{{-   else -}}
+{{-     $kernel_headers = "linux-headers" -}}
+{{-   end -}}
+{{-   $virtualbox_kernel_packages = list "virtualbox-host-dkms" $kernel_headers -}}
+{{- end -}}
+{{- if $install_virtualbox -}}
+{{-   $_ := set $pkgs "virtualbox_arch" (concat $virtualbox_base_packages $virtualbox_kernel_packages) -}}
+{{- else -}}
+{{-   $_ := set $pkgs "virtualbox_arch" (list) -}}
+{{- end -}}
+
 {{- $_ := set $pkgs "npm" (list
   "@bitwarden/cli"
 ) -}}
@@ -153,6 +192,7 @@ install_tui_apps = {{ $install_tui_apps }}
 install_fonts = {{ $install_fonts }}
 install_printers_scanners = {{ $install_printers_scanners }}
 install_exercism = {{ $install_exercism }}
+install_virtualbox = {{ $install_virtualbox }}
 
 # Combined package lists
 {{- if eq $os "arch-linux" }}
@@ -166,5 +206,6 @@ pkgs_kde = {{ get $pkgs "kde_arch" | toToml }}
 pkgs_media = {{ get $pkgs "media_arch" | toToml }}
 pkgs_timeshift = {{ get $pkgs "timeshift_arch" | toToml }}
 pkgs_other = {{ get $pkgs "other_arch" | toToml }}
+pkgs_virtualbox = {{ get $pkgs "virtualbox_arch" | toToml }}
 pkgs_npm = {{ get $pkgs "npm" | toToml }}
 {{- end }}

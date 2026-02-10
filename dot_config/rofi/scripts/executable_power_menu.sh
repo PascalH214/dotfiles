@@ -10,7 +10,7 @@ elif [ x"$@" = x"reboot" ]; then
   systemctl reboot
   exit 0
 elif [ x"$@" = x"shutdown" ]; then
-  systemctl shutdown
+  systemctl poweroff
   exit 0
 fi
 

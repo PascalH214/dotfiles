@@ -69,4 +69,8 @@ install_yay_packages "Timeshift and related packages" {{ range .pkgs_timeshift }
 
 install_yay_packages "Other Tools" {{ range .pkgs_other }}{{ . | quote }} {{ end }}
 
+{{ if .install_virtualbox }}
+install_yay_packages "VirtualBox and Host Modules" {{ range .pkgs_virtualbox }}{{ . | quote }} {{ end }}
+{{- end }}
+
 {{ end -}}
