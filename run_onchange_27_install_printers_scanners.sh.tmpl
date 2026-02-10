@@ -37,10 +37,11 @@ install_yay_packages() {
   echo -e "\n${GREEN}✓ ${label} installation finished.${NC}\n"
 }
 
-{{ if eq .os "arch-linux" -}}
+{{ if or (eq .os "arch-linux") (eq .os "debian") -}}
 
 {{ if .install_printers_scanners }}
 
+{{ if eq .os "arch-linux" -}}
 # Install CUPS for printing
 install_yay_packages "CUPS (Printing)" cups cups-pdf cups-filters ghostscript gsfonts
 
@@ -50,6 +51,31 @@ install_yay_packages "SANE (Scanning)" sane sane-airscan ipp-usb
 # Optional GUI frontends for scanning
 {{ if not .headless -}}
 install_yay_packages "Scanner Frontends" simple-scan skanlite
+{{- end }}
+{{- else if eq .os "debian" -}}
+# Install CUPS for printing (Debian)
+echo -e "${BLUE}======================================${NC}"
+echo -e "${BOLD}Installing CUPS (Printing):${NC}"
+echo -e "${BLUE}======================================${NC}\n"
+sudo apt update
+sudo apt install -y cups cups-pdf cups-filters ghostscript
+echo -e "\n${GREEN}✓ CUPS (Printing) installation finished.${NC}\n"
+
+# Install SANE and related packages for scanning (Debian)
+echo -e "${BLUE}======================================${NC}"
+echo -e "${BOLD}Installing SANE (Scanning):${NC}"
+echo -e "${BLUE}======================================${NC}\n"
+sudo apt install -y sane sane-airscan ipp-usb
+echo -e "\n${GREEN}✓ SANE (Scanning) installation finished.${NC}\n"
+
+# Optional GUI frontends for scanning
+{{ if not .headless -}}
+echo -e "${BLUE}======================================${NC}"
+echo -e "${BOLD}Installing Scanner Frontends:${NC}"
+echo -e "${BLUE}======================================${NC}\n"
+sudo apt install -y simple-scan skanlite
+echo -e "\n${GREEN}✓ Scanner Frontends installation finished.${NC}\n"
+{{- end }}
 {{- end }}
 
 {{ end -}}

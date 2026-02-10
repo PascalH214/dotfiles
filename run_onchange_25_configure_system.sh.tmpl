@@ -23,9 +23,9 @@ print_end() {
   echo -e "\n${GREEN}✓ Configure ${label} finished${NC}\n"
 }
 
-{{ if eq .os "arch-linux" -}}
+{{ if or (eq .os "arch-linux") (eq .os "debian") -}}
 
-{{- if .install_ly }}
+{{- if and (eq .os "arch-linux") .install_ly }}
 print_begin "ly (display-manager)"
 
 sudo systemctl enable ly@tty2.service
@@ -62,11 +62,13 @@ sudo systemctl enable --now docker
 
 print_end "docker"
 
+{{ if eq .os "arch-linux" -}}
 print_begin "openrazer-daemon"
 
 sudo gpasswd -a $USER openrazer
 
 print_end "openrazer-daemon"
+{{- end }}
 
 print_begin "bluetooth"
 
@@ -86,7 +88,7 @@ print_begin "Syncthing"
 
 systemctl --user daemon-reload
 systemctl --user enable --now syncthing.service
-
+and (eq .os "arch-linux") 
 print_end "Syncthing"
 {{- if .install_timeshift }}
 print_begin "grub-btrfsd & teimshift-autosnap"

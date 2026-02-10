@@ -20,7 +20,7 @@
 {{- $bw_server_url := promptStringOnce . "bw_server_url" "Bitwarden server URL (self-hosted)" -}}
 {{- $bw_ssh_key := promptStringOnce . "bw_ssh_key" "Bitwarden SSH key item name (leave empty to skip)" -}}
 {{- $git_username := promptStringOnce . "git_username" "What should your git username be?" -}}
-{{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux") "arch-linux" -}}
+{{- $os := promptChoiceOnce . "os" "Choose your os" (list "arch-linux" "debian") "arch-linux" -}}
 {{- $headless := promptBoolOnce . "headless" "Is your system headless?" true -}}
 {{- $is_gui := not $headless -}}
 
@@ -160,7 +160,68 @@ NOTE: All OS-specific package lists should be defined here.
   "@bitwarden/cli"
 ) -}}
 
+{{/* Debian package equivalents */}}
+{{- $cli_debian_packages := list
+  "kitty" "fastfetch" "git" "man-db" "less" "zoxide" "fd-find"
+  "ripgrep" "bat" "p7zip-full" "rar" "zip" "unzip" "rsync" "rclone" "translate-shell" "npm" "syncthing"
+  "entr" "git-filter-repo" "iw" "wireless-tools"
+-}}
+{{- if $install_exercism -}}
+{{-   $_ := set $pkgs "cli_debian" (concat $cli_debian_packages (list "exercism" "bats")) -}}
+{{- else -}}
+{{-   $_ := set $pkgs "cli_debian" $cli_debian_packages -}}
+{{- end -}}
 
+{{- $tui_debian_packages := list "neovim" "tmux" "fzf" "tree" "btop" -}}
+{{- if $install_tui_apps -}}
+{{-   $_ := set $pkgs "tui_debian" $tui_debian_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "tui_debian" (list) -}}
+{{- end -}}
+
+{{- $dev_debian_packages := list "docker.io" "docker-compose" "maven" "npm" "terraform" "ansible" -}}
+{{- if $install_dev_tools -}}
+{{-   $_ := set $pkgs "dev_debian" $dev_debian_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "dev_debian" (list) -}}
+{{- end -}}
+
+{{- $gui_debian_packages := list "firefox-esr" "bitwarden" "discord" "libreoffice" "thunderbird" -}}
+{{- if $install_gui_apps -}}
+{{-   $_ := set $pkgs "gui_debian" $gui_debian_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "gui_debian" (list) -}}
+{{- end -}}
+
+{{- $fonts_debian_packages := list "fonts-noto-emoji" -}}
+{{- if $install_fonts -}}
+{{-   $_ := set $pkgs "fonts_debian" $fonts_debian_packages -}}
+{{- else -}}
+{{-   $_ := set $pkgs "fonts_debian" (list) -}}
+{{- end -}}
+
+{{- $_ := set $pkgs "hyprland_debian" (list
+  "rofi" "waybar" "dunst" "bluez" "bluez-tools" "brightnessctl" "pipewire"
+  "pipewire-pulse" "wireplumber"
+) -}}
+
+{{- $_ := set $pkgs "kde_debian" (list
+  "qt5ct" "dolphin" "ark" "okular" "kdialog" "kcalc"
+) -}}
+
+{{- $_ := set $pkgs "media_debian" (list
+  "ffmpeg" "ffmpegthumbnailer" "tumbler" "vlc"
+) -}}
+
+{{- $_ := set $pkgs "timeshift_debian" (list
+  "timeshift"
+) -}}
+
+{{- $_ := set $pkgs "other_debian" (list) -}}
+{{- if not $headless -}}
+{{-   $other_debian_packages := list "system-config-printer" "cups" -}}
+{{-   $_ := set $pkgs "other_debian" (concat ($pkgs.other_debian) $other_debian_packages) -}}
+{{- end -}}
 
 
 {{/*
@@ -207,5 +268,17 @@ pkgs_media = {{ get $pkgs "media_arch" | toToml }}
 pkgs_timeshift = {{ get $pkgs "timeshift_arch" | toToml }}
 pkgs_other = {{ get $pkgs "other_arch" | toToml }}
 pkgs_virtualbox = {{ get $pkgs "virtualbox_arch" | toToml }}
+pkgs_npm = {{ get $pkgs "npm" | toToml }}
+{{- else if eq $os "debian" }}
+pkgs_cli = {{ get $pkgs "cli_debian" | toToml }}
+pkgs_tui = {{ get $pkgs "tui_debian" | toToml }}
+pkgs_dev = {{ get $pkgs "dev_debian" | toToml }}
+pkgs_gui = {{ get $pkgs "gui_debian" | toToml }}
+pkgs_fonts = {{ get $pkgs "fonts_debian" | toToml }}
+pkgs_hyprland = {{ get $pkgs "hyprland_debian" | toToml }}
+pkgs_kde = {{ get $pkgs "kde_debian" | toToml }}
+pkgs_media = {{ get $pkgs "media_debian" | toToml }}
+pkgs_timeshift = {{ get $pkgs "timeshift_debian" | toToml }}
+pkgs_other = {{ get $pkgs "other_debian" | toToml }}
 pkgs_npm = {{ get $pkgs "npm" | toToml }}
 {{- end }}

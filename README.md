@@ -1,6 +1,6 @@
 # Dotfiles Management with Chezmoi
 
-A comprehensive dotfiles repository managed with [Chezmoi](https://www.chezmoi.io/), automating system configuration across multiple distributions (Arch Linux, Ubuntu) and platforms.
+A comprehensive dotfiles repository managed with [Chezmoi](https://www.chezmoi.io/), automating system configuration across multiple distributions (Arch Linux, Debian) and platforms.
 
 ## Overview
 
@@ -15,7 +15,7 @@ This project uses Chezmoi to manage dotfiles and system configurations with supp
 
 ## Features
 
-- **Multi-OS Support**: Arch Linux and Ubuntu specific package management
+- **Multi-OS Support**: Arch Linux and Debian specific package management
 - **Automated Setup**: Run scripts execute on changes via Chezmoi hooks
 - **Templated Configs**: Configuration files support templating for dynamic values
 - **Ansible Integration**: System-level configuration via Ansible playbooks
@@ -29,7 +29,7 @@ This project uses Chezmoi to manage dotfiles and system configurations with supp
 - Chezmoi
 - Ansible (for system configuration tasks)
 - For Arch Linux: `yay` (for AUR packages)
-- For package installations: `pacman` (Arch) or `apt` (Ubuntu)
+- For package installations: `pacman` (Arch) or `apt` (Debian)
 
 ## Installation
 

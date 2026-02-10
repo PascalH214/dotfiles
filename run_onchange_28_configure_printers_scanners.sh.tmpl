@@ -21,7 +21,7 @@ print_end() {
   echo -e "\n${GREEN}✓ Configure ${label} finished${NC}\n"
 }
 
-{{ if eq .os "arch-linux" -}}
+{{ if or (eq .os "arch-linux") (eq .os "debian") -}}
 
 {{ if .install_printers_scanners }}
 

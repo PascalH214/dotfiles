@@ -40,7 +40,11 @@
         },
         {
             "type": "packages",
+{{ if eq .os "arch-linux" -}}
             "format": "{} (pacman)",
+{{- else if eq .os "debian" -}}
+            "format": "{} (apt)",
+{{- end }}
             "key": " ",
             "keyColor": "33",  
         },
