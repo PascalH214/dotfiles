@@ -16,8 +16,9 @@ install_npm_packages() {
   local pkgs=("$@")
 
   if ! command -v npm >/dev/null 2>&1; then
-    echo -e "${RED}error:${NC} npm not installed" >&2
-    return 1
+    echo -e "${BLUE}ℹ${NC} npm not installed, skipping npm packages installation"
+    echo -e "${BLUE}ℹ${NC} Install npm first if you need these packages: ${pkgs[*]}"
+    return 0
   fi
 
   if [ "${#pkgs[@]}" -eq 0 ]; then

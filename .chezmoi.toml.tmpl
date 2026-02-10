@@ -84,7 +84,7 @@ NOTE: All OS-specific package lists should be defined here.
 {{-   $_ := set $pkgs "tui_arch" (append ($pkgs.tui_arch) "ly") -}}
 {{- end -}}
 
-{{- $dev_arch_packages := list "docker" "docker-compose" "maven" "npm" "terraform" "ansible" -}}
+{{- $dev_arch_packages := list "docker" "docker-compose" "maven" "terraform" "ansible" -}}
 {{- if $install_dev_tools -}}
 {{-   $_ := set $pkgs "dev_arch" $dev_arch_packages -}}
 {{- else -}}
@@ -179,7 +179,7 @@ NOTE: All OS-specific package lists should be defined here.
 {{-   $_ := set $pkgs "tui_debian" (list) -}}
 {{- end -}}
 
-{{- $dev_debian_packages := list "docker.io" "docker-compose" "maven" "npm" "terraform" "ansible" -}}
+{{- $dev_debian_packages := list "docker.io" "docker-compose" "maven" "terraform" "ansible" -}}
 {{- if $install_dev_tools -}}
 {{-   $_ := set $pkgs "dev_debian" $dev_debian_packages -}}
 {{- else -}}
