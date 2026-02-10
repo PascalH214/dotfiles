@@ -163,11 +163,11 @@ NOTE: All OS-specific package lists should be defined here.
 {{/* Debian package equivalents */}}
 {{- $cli_debian_packages := list
   "kitty" "fastfetch" "git" "man-db" "less" "zoxide" "fd-find"
-  "ripgrep" "bat" "p7zip-full" "rar" "zip" "unzip" "rsync" "rclone" "translate-shell" "nodejs" "npm" "syncthing" "ansible"
-  "entr" "git-filter-repo" "iw" "wireless-tools"
+  "ripgrep" "bat" "p7zip-full" "unrar-free" "zip" "unzip" "rsync" "rclone" "nodejs" "npm" "syncthing" "ansible"
+  "entr" "git-filter-repo" "iw" "wireless-tools" "curl" "wget"
 -}}
 {{- if $install_exercism -}}
-{{-   $_ := set $pkgs "cli_debian" (concat $cli_debian_packages (list "exercism" "bats")) -}}
+{{-   $_ := set $pkgs "cli_debian" (concat $cli_debian_packages (list "bats")) -}}
 {{- else -}}
 {{-   $_ := set $pkgs "cli_debian" $cli_debian_packages -}}
 {{- end -}}
@@ -179,21 +179,21 @@ NOTE: All OS-specific package lists should be defined here.
 {{-   $_ := set $pkgs "tui_debian" (list) -}}
 {{- end -}}
 
-{{- $dev_debian_packages := list "docker.io" "docker-compose" "maven" "terraform" -}}
+{{- $dev_debian_packages := list "docker.io" "docker-compose" "maven" -}}
 {{- if $install_dev_tools -}}
 {{-   $_ := set $pkgs "dev_debian" $dev_debian_packages -}}
 {{- else -}}
 {{-   $_ := set $pkgs "dev_debian" (list) -}}
 {{- end -}}
 
-{{- $gui_debian_packages := list "firefox-esr" "bitwarden" "discord" "libreoffice" "thunderbird" -}}
+{{- $gui_debian_packages := list "firefox-esr" "libreoffice" "thunderbird" -}}
 {{- if $install_gui_apps -}}
 {{-   $_ := set $pkgs "gui_debian" $gui_debian_packages -}}
 {{- else -}}
 {{-   $_ := set $pkgs "gui_debian" (list) -}}
 {{- end -}}
 
-{{- $fonts_debian_packages := list "fonts-noto-emoji" -}}
+{{- $fonts_debian_packages := list "fonts-noto-color-emoji" -}}
 {{- if $install_fonts -}}
 {{-   $_ := set $pkgs "fonts_debian" $fonts_debian_packages -}}
 {{- else -}}

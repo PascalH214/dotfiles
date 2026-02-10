@@ -40,7 +40,7 @@ echo -e "${BLUE}======================================${NC}\n"
 # Check if ansible is installed
 if ! command -v ansible-playbook &> /dev/null; then
     echo -e "${RED}Error: ansible is not installed${NC}"
-    echo -e "${YELLOW}Please install ansible first: sudo pacman -S ansible (Arch) or sudo apt install ansible (Ubuntu)${NC}"
+    echo -e "${YELLOW}Please install ansible first: sudo pacman -S ansible (Arch) or sudo apt install ansible (Debian)${NC}"
     exit 1
 fi
 
