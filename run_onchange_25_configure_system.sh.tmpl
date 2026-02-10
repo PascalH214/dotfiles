@@ -88,9 +88,9 @@ print_begin "Syncthing"
 
 systemctl --user daemon-reload
 systemctl --user enable --now syncthing.service
-and (eq .os "arch-linux") 
+
 print_end "Syncthing"
-{{- if .install_timeshift }}
+{{- if and (eq .os "arch-linux") .install_timeshift }}
 print_begin "grub-btrfsd & teimshift-autosnap"
 
 sudo /etc/grub.d/41_snapshots-btrfs
