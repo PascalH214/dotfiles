@@ -110,17 +110,21 @@ chezmoi apply
 Setup scripts run automatically when their source files change. All scripts source the shared library (`lib/common.sh.tmpl`) for common functions.
 
 ### Initialization
+
 - `run_onchange_00_print_info.sh.tmpl` - Display system information and confirm setup
 - `run_onchange_05_install_yay.sh.tmpl` - Install yay package manager (Arch only)
 
 ### Modular Package Installation (run_onchange_10_*)
+
 Scripts are modular to enable independent feature management:
 
 **Base Packages** (always run):
+
 - `run_onchange_10_install_base_packages_arch.sh.tmpl` - CLI, TUI, Dev, GUI tools (Arch)
 - `run_onchange_10_install_base_packages_debian.sh.tmpl` - CLI, TUI, Dev, GUI tools (Debian)
 
 **Optional Packages** (conditional on `.chezmoi.toml` flags):
+
 - `run_onchange_10_install_hyprland_arch.sh.tmpl` - Hyprland WM packages (.install_hyprland)
 - `run_onchange_10_install_hyprland_debian.sh.tmpl` - Hyprland WM packages (.install_hyprland)
 - `run_onchange_10_install_kde_arch.sh.tmpl` - KDE applications (.install_kde_apps)
@@ -133,6 +137,7 @@ Scripts are modular to enable independent feature management:
 - `run_onchange_10_install_gaming_arch.sh.tmpl` - Gaming tools and optimizations (.install_gaming)
 
 ### Additional Setup
+
 - `run_onchange_15_install_packages_npm.sh.tmpl` - Install NPM packages globally
 - `run_onchange_20_bitwarden.sh.tmpl` - Bitwarden CLI setup for SSH keys
 - `run_onchange_22_install_gpu_drivers.sh.tmpl` - GPU drivers (AMD, NVIDIA, Intel)
@@ -148,6 +153,7 @@ Scripts are modular to enable independent feature management:
 The `lib/common.sh.tmpl` file contains reusable functions used by all setup scripts:
 
 **Output Functions**:
+
 - `print_section(label)` - Print formatted section headers
 - `print_success(message)` - Print success messages with checkmark
 - `print_info(message)` - Print information messages
@@ -155,11 +161,13 @@ The `lib/common.sh.tmpl` file contains reusable functions used by all setup scri
 - `print_error(message)` - Print error messages to stderr
 
 **Package Installation**:
+
 - `install_yay_packages(label, packages...)` - Install packages via yay (Arch)
 - `install_apt_packages(label, packages...)` - Install packages via apt (Debian)
 - `install_npm_packages(label, packages...)` - Install global NPM packages
 
 **System Utilities**:
+
 - `add_user_to_group(username, groupname)` - Safely add user to group
 - `command_exists(command)` - Check if command is available
 - `enable_service(service, [user_service])` - Enable and start systemd services
