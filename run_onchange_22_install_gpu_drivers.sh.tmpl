@@ -46,8 +46,12 @@ if ! command -v apt >/dev/null 2>&1; then
 fi
 {{- end }}
 
-gpu_{{ if eq .os "arch-linux" -}}
-    # Install AMD AMDGPU driver and utilities (using official repos)
+gpu_vendor="{{ .gpu_vendor }}"
+
+case "$gpu_vendor" in
+  amd)
+    print_section "Installing AMD GPU Drivers"
+    {{- if eq .os "arch-linux" }}
     yay -S --noconfirm --needed \
       xf86-video-amdgpu \
       vulkan-radeon \
@@ -56,23 +60,12 @@ gpu_{{ if eq .os "arch-linux" -}}
       lib32-libva-mesa-driver \
       mesa \
       lib32-mesa
-    
-    if [ $? -eq 0 ]; then
-      print_success "AMD GPU drivers installed"
-    else
-      print_warning "Some GPU driver packages failed to install - this may be expected for lib32 packages"
-    fi
-    
-    # Install additional tools for monitoring and control
+
     print_info "Installing AMD GPU management tools..."
-    
     yay -S --noconfirm --needed \
       radeontop \
       rocm-opencl-runtime
-    
-    print_success "AMD GPU management tools installed"
-    {{- else if eq .os "debian" -}}
-    # Install AMD AMDGPU driver and utilities (Debian)
+    {{- else if eq .os "debian" }}
     sudo apt update
     sudo apt install -y \
       xserver-xorg-video-amdgpu \
@@ -80,75 +73,37 @@ gpu_{{ if eq .os "arch-linux" -}}
       libva-mesa-driver \
       mesa-va-drivers \
       mesa-utils
-    
-    if [ $? -eq 0 ]; then
-      print_success "AMD GPU drivers installed"
-    else
-      print_warning "Some GPU driver packages failed to install"
-    fi
-    
-    # Install additional tools for monitoring
+
     print_info "Installing AMD GPU management tools..."
-    
     sudo apt install -y radeontop
-    
-    print_success "AMD GPU management tools installed"
     {{- end }}
-    # Install additional tools for monitoring and control
-    print_info "Installing AMD GPU management tools..."
-    
-    yay -S --noconfirm --needed \
-      radeontop \
-      rocm-opencl-runtime
-    
-    {{ if eq .os "arch-linux" -}}
+    print_success "AMD GPU drivers installed"
+    ;;
+  nvidia)
+    print_section "Installing NVIDIA GPU Drivers"
+    {{- if eq .os "arch-linux" }}
     yay -S --noconfirm --needed \
       nvidia \
       nvidia-utils \
       lib32-nvidia-utils \
       nvidia-dkms
-    
-    print_success "NVIDIA drivers installed"
-    
+
     print_info "Installing NVIDIA additional tools..."
-    
     yay -S --noconfirm --needed \
       cuda \
       cudnn
-    
-    print_success "NVIDIA additional tools installed"
-    {{- else if eq .os "debian" -}}
+    {{- else if eq .os "debian" }}
     sudo apt update
     sudo apt install -y \
       nvidia-driver \
       nvidia-smi \
       nvidia-cuda-toolkit
-    
-    print_success "NVIDIA drivers installed"
     {{- end }}
-    
-    print_success "AMD drivers installation and configuration completed!"
-    ;;
-    
-  nvidia)
-    print_section "Installing NVIDIA GPU Drivers"
-    
-    print_info "Installing NVIDIA drivers..."
-    
-    yay -S --noconfirm --needed \
-      nvidia \
-      nvidia-utils \
-      lib32-nvidia-utils \
-      nvidia-dkms
-    
     print_success "NVIDIA drivers installed"
-    
-    print_info "Installing NVIDIA additional tools..."
-    
-    yay -S --noconfirm --needed \
-      cuda \
-      cudnn
-    {{ if eq .os "arch-linux" -}}
+    ;;
+  intel)
+    print_section "Installing Intel GPU Drivers"
+    {{- if eq .os "arch-linux" }}
     yay -S --noconfirm --needed \
       intel-media-driver \
       libva-intel-driver \
@@ -157,31 +112,16 @@ gpu_{{ if eq .os "arch-linux" -}}
       lib32-vulkan-intel \
       mesa \
       lib32-mesa
-    
-    print_success "Intel GPU drivers installed"
-    {{- else if eq .os "debian" -}}
+    {{- else if eq .os "debian" }}
     sudo apt update
     sudo apt install -y \
       intel-media-va-driver \
       i965-va-driver \
       mesa-vulkan-drivers \
       mesa-utils
-    
-    print_success "Intel GPU drivers installed"
     {{- end }}
-    yay -S --noconfirm --needed \
-      intel-media-driver \
-      libva-intel-driver \
-      lib32-libva-intel-driver \
-      vulkan-intel \
-      lib32-vulkan-intel \
-      mesa \
-      lib32-mesa
-    
     print_success "Intel GPU drivers installed"
-    print_success "Intel drivers installation completed!"
     ;;
-    
   *)
     echo -e "${RED}error:${NC} Unknown GPU vendor: $gpu_vendor" >&2
     exit 1

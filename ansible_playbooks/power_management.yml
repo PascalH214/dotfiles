@@ -1,0 +1,322 @@
+---
+- name: Configure suspend and hibernate (Arch + GRUB)
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+
+  vars:
+    swapfile_path: /swap/swapfile
+    swap_size: 32G
+    swap_priority: 10
+    grub_snippet: /etc/default/grub.d/99-hibernate.cfg
+    idle_suspend_sec: 480
+    idle_hibernate_sec: 1800
+
+  tasks:
+    - name: Ensure required packages are installed
+      ansible.builtin.package:
+        name:
+          - btrfs-progs
+          - e2fsprogs
+        state: present
+
+    - name: Detect root device
+      ansible.builtin.command: findmnt -no SOURCE /
+      register: root_source
+      changed_when: false
+
+    - name: Resolve root filesystem UUID
+      ansible.builtin.command: findmnt -no UUID /
+      register: root_uuid
+      changed_when: false
+
+    - name: Detect root filesystem type
+      ansible.builtin.command: findmnt -no FSTYPE /
+      register: root_fstype
+      changed_when: false
+
+    - name: Determine available space on root
+      ansible.builtin.command: df --output=avail -B1 /
+      register: root_avail
+      changed_when: false
+
+    - name: Parse available space and swap size
+      ansible.builtin.set_fact:
+        root_avail_bytes: "{{ (root_avail.stdout_lines | last | trim) | int }}"
+        swap_size_bytes: "{{ swap_size | human_to_bytes }}"
+        hibernate_delay_sec: "{{ idle_hibernate_sec | int - idle_suspend_sec | int }}"
+
+    - name: Ensure idle timing is valid
+      ansible.builtin.assert:
+        that:
+          - idle_suspend_sec | int > 0
+          - idle_hibernate_sec | int > idle_suspend_sec | int
+          - hibernate_delay_sec | int > 0
+        fail_msg: >-
+          idle_hibernate_sec must be greater than idle_suspend_sec.
+
+    - name: Ensure enough free space for swapfile
+      ansible.builtin.assert:
+        that:
+          - root_avail_bytes > swap_size_bytes
+        fail_msg: >-
+          Not enough free space on /. Need at least {{ swap_size_bytes }} bytes
+          for swapfile, but only {{ root_avail_bytes }} bytes are available.
+
+    - name: Check if swapfile exists
+      ansible.builtin.stat:
+        path: "{{ swapfile_path }}"
+      register: swapfile_stat
+
+    - name: Ensure existing swapfile size matches desired size
+      ansible.builtin.assert:
+        that:
+          - swapfile_stat.stat.size | int == swap_size_bytes
+        fail_msg: >-
+          Existing swapfile size does not match swap_size. Remove or resize
+          {{ swapfile_path }} to {{ swap_size }} before rerunning.
+      when: swapfile_stat.stat.exists
+    - name: Configure swapfile and hibernate settings
+      block:
+        - name: Ensure swap directory exists
+          ansible.builtin.file:
+            path: /swap
+            state: directory
+            owner: root
+            group: root
+            mode: '0700'
+
+        - name: Disable CoW on swap directory (btrfs only)
+          ansible.builtin.command: chattr +C /swap
+          when: root_fstype.stdout == 'btrfs'
+          changed_when: false
+
+        - name: Create empty swapfile placeholder
+          ansible.builtin.command: truncate -s 0 {{ swapfile_path }}
+          args:
+            creates: "{{ swapfile_path }}"
+          register: swapfile_created
+
+        - name: Disable CoW on swapfile (btrfs only)
+          ansible.builtin.command: chattr +C {{ swapfile_path }}
+          when:
+            - root_fstype.stdout == 'btrfs'
+            - swapfile_created is changed
+          changed_when: false
+
+        - name: Allocate swapfile size
+          ansible.builtin.command: fallocate -l {{ swap_size }} {{ swapfile_path }}
+          when: swapfile_created is changed
+
+        - name: Ensure swapfile permissions
+          ansible.builtin.file:
+            path: "{{ swapfile_path }}"
+            owner: root
+            group: root
+            mode: '0600'
+
+        - name: Create swap signature
+          ansible.builtin.command: mkswap {{ swapfile_path }}
+          when: swapfile_created is changed
+
+        - name: Ensure swapfile entry in fstab
+          ansible.posix.mount:
+            path: none
+            src: "{{ swapfile_path }}"
+            fstype: swap
+            opts: "defaults,pri={{ swap_priority }}"
+            state: present
+          register: fstab_result
+
+        - name: Check active swaps
+          ansible.builtin.command: swapon --show=NAME --noheadings
+          register: swap_on
+          changed_when: false
+
+        - name: Enable swapfile
+          ansible.builtin.command: swapon {{ swapfile_path }}
+          when: swapfile_path not in swap_on.stdout
+
+        - name: Determine resume offset for swapfile
+          ansible.builtin.shell: >-
+            filefrag -v {{ swapfile_path }}
+            | awk '/^[ ]*0:/{print $4; exit}'
+            | sed 's/\..*//'
+          register: resume_offset
+          changed_when: false
+
+        - name: Ensure resume offset was detected
+          ansible.builtin.assert:
+            that:
+              - resume_offset.stdout | length > 0
+            fail_msg: Failed to determine swapfile resume offset.
+
+        - name: Write GRUB hibernate snippet
+          ansible.builtin.file:
+            path: /etc/default/grub.d
+            state: directory
+            owner: root
+            group: root
+            mode: '0755'
+
+        - name: Write GRUB hibernate snippet
+          ansible.builtin.copy:
+            dest: "{{ grub_snippet }}"
+            owner: root
+            group: root
+            mode: '0644'
+            backup: true
+            content: |
+              GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} resume=UUID={{ root_uuid.stdout }} resume_offset={{ resume_offset.stdout }}"
+          register: grub_snippet_result
+
+        - name: Ensure resume hook in mkinitcpio
+          ansible.builtin.replace:
+            path: /etc/mkinitcpio.conf
+            regexp: '^(HOOKS=.*\bblock\b)(?!.*\bresume\b)(.*)$'
+            replace: '\1 resume\2'
+            backup: true
+          register: mkinitcpio_resume
+
+        - name: Rebuild initramfs
+          ansible.builtin.command: mkinitcpio -P
+          when: mkinitcpio_resume.changed
+
+        - name: Regenerate GRUB config
+          ansible.builtin.command: grub-mkconfig -o /boot/grub/grub.cfg
+          when: grub_snippet_result.changed
+      rescue:
+        - name: Roll back GRUB snippet
+          ansible.builtin.copy:
+            src: "{{ grub_snippet_result.backup_file }}"
+            dest: "{{ grub_snippet }}"
+            owner: root
+            group: root
+            mode: '0644'
+            remote_src: true
+          when: grub_snippet_result is defined and grub_snippet_result.backup_file is defined
+
+        - name: Remove GRUB snippet if newly created
+          ansible.builtin.file:
+            path: "{{ grub_snippet }}"
+            state: absent
+          when: grub_snippet_result is defined and grub_snippet_result.backup_file is not defined
+
+        - name: Roll back mkinitcpio config
+          ansible.builtin.copy:
+            src: "{{ mkinitcpio_resume.backup_file }}"
+            dest: /etc/mkinitcpio.conf
+            owner: root
+            group: root
+            mode: '0644'
+            remote_src: true
+          when: mkinitcpio_resume is defined and mkinitcpio_resume.backup_file is defined
+
+        - name: Remove swapfile entry from fstab if added
+          ansible.posix.mount:
+            path: none
+            src: "{{ swapfile_path }}"
+            fstype: swap
+            state: absent
+          when: fstab_result is defined and fstab_result.changed
+
+        - name: Disable swapfile if it was enabled
+          ansible.builtin.command: swapoff {{ swapfile_path }}
+          when: swapfile_created is defined and swapfile_created.changed
+          failed_when: false
+
+        - name: Remove swapfile if it was created by this run
+          ansible.builtin.file:
+            path: "{{ swapfile_path }}"
+            state: absent
+          when: swapfile_created is defined and swapfile_created.changed
+
+    - name: Ensure systemd logind drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/logind.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Configure idle suspend-then-hibernate
+      ansible.builtin.copy:
+        dest: /etc/systemd/logind.conf.d/99-idle-suspend.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [Login]
+          IdleAction=suspend-then-hibernate
+          IdleActionSec={{ idle_suspend_sec }}
+
+    - name: Ensure systemd sleep drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/sleep.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Configure hibernate delay after suspend
+      ansible.builtin.copy:
+        dest: /etc/systemd/sleep.conf.d/99-hibernate-delay.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [Sleep]
+          HibernateDelaySec={{ hibernate_delay_sec }}
+
+    - name: Ensure systemd sleep hook directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/system-sleep
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Install Hyprlock sleep hook
+      ansible.builtin.copy:
+        dest: /etc/systemd/system-sleep/hyprlock
+        owner: root
+        group: root
+        mode: '0755'
+        content: |
+          #!/bin/sh
+          set -eu
+
+          case "$1" in
+            pre)
+              if ! command -v hyprlock >/dev/null 2>&1; then
+                exit 0
+              fi
+
+              loginctl list-sessions --no-legend | while read -r session _; do
+                [ -z "$session" ] && continue
+
+                session_type=$(loginctl show-session "$session" -p Type --value 2>/dev/null || true)
+                session_state=$(loginctl show-session "$session" -p State --value 2>/dev/null || true)
+
+                [ "$session_type" = "wayland" ] || continue
+                [ "$session_state" = "active" ] || continue
+
+                user=$(loginctl show-session "$session" -p Name --value 2>/dev/null || true)
+                uid=$(loginctl show-session "$session" -p User --value 2>/dev/null || true)
+
+                if [ -n "$user" ] && [ -n "$uid" ]; then
+                  if ! pgrep -u "$user" -x hyprlock >/dev/null 2>&1; then
+                    runuser -l "$user" -c "XDG_RUNTIME_DIR=/run/user/$uid systemd-run --user --collect --quiet hyprlock" >/dev/null 2>&1 || true
+                  fi
+                  loginctl lock-session "$session" >/dev/null 2>&1 || true
+                fi
+              done
+              ;;
+          esac
+
+    - name: Reminder to restart logind or reboot
+      ansible.builtin.debug:
+        msg: >-
+          Idle suspend/hibernate timers updated. Restart systemd-logind or reboot
+          for the new timers to take effect.
