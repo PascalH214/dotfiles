@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
+
+{{ if eq .os "arch-linux" -}}
+
+print_section "Installing Base Packages (Arch Linux)"
+
+install_yay_packages "CLI Tools" {{ range .pkgs_cli }}{{ . | quote }} {{ end }}
+install_yay_packages "TUI Applications" {{ range .pkgs_tui }}{{ . | quote }} {{ end }}
+install_yay_packages "Dev Tools" {{ range .pkgs_dev }}{{ . | quote }} {{ end }}
+
+{{ if not .headless -}}
+install_yay_packages "GUI Applications" {{ range .pkgs_gui }}{{ . | quote }} {{ end }}
+install_yay_packages "Fonts" {{ range .pkgs_fonts }}{{ . | quote }} {{ end }}
+{{- end }}
+
+install_yay_packages "Other Tools" {{ range .pkgs_other }}{{ . | quote }} {{ end }}
+
+print_success "Base packages installed successfully"
+
+{{ end -}}

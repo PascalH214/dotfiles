@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
+
+{{ if and (eq .os "arch-linux") .install_timeshift -}}
+
+print_section "Installing Timeshift Packages (Arch Linux)"
+
+install_yay_packages "Timeshift and related packages" {{ range .pkgs_timeshift }}{{ . | quote }} {{ end }}
+
+print_success "Timeshift packages installed"
+
+{{ end -}}

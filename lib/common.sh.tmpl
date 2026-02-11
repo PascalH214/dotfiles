@@ -1,0 +1,250 @@
+#!/bin/bash
+# Common functions and utilities for chezmoi scripts
+# This file should be sourced in other scripts: source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
+
+# ============================================================================
+# Color Definitions
+# ============================================================================
+readonly GREEN='\033[0;32m'
+readonly BLUE='\033[0;34m'
+readonly BOLD='\033[1m'
+readonly RED='\033[0;31m'
+readonly YELLOW='\033[1;33m'
+readonly CYAN='\033[0;36m'
+readonly NC='\033[0m'
+
+# ============================================================================
+# Output Functions
+# ============================================================================
+
+# Print a section header
+print_section() {
+  local label="$1"
+  echo -e "${BLUE}======================================${NC}"
+  echo -e "${BOLD}${label}${NC}"
+  echo -e "${BLUE}======================================${NC}\n"
+}
+
+# Print a success message
+print_success() {
+  echo -e "${GREEN}✓ $1${NC}\n"
+}
+
+# Print an info message
+print_info() {
+  echo -e "${BLUE}ℹ $1${NC}"
+}
+
+# Print a warning message
+print_warning() {
+  echo -e "${YELLOW}⚠ $1${NC}"
+}
+
+# Print an error message
+print_error() {
+  echo -e "${RED}error:${NC} $1" >&2
+}
+
+# ============================================================================
+# Package Installation Functions
+# ============================================================================
+
+# Install packages using yay (Arch Linux)
+install_yay_packages() {
+  local label="$1"
+  shift
+  local pkgs=("$@")
+
+  if ! command -v yay >/dev/null 2>&1; then
+    print_error "yay not installed"
+    return 1
+  fi
+
+  if [ "${#pkgs[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo -e "${BLUE}======================================${NC}"
+  echo -e "${BOLD}Installing ${label}:${NC}"
+  for pkg in "${pkgs[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo -e "${BLUE}======================================${NC}\n"
+
+  yay -S --noconfirm --needed "${pkgs[@]}"
+
+  print_success "${label} installation finished"
+}
+
+# Install packages using apt (Debian)
+install_apt_packages() {
+  local label="$1"
+  shift
+  local pkgs=("$@")
+
+  if ! command -v apt >/dev/null 2>&1; then
+    print_error "apt not installed"
+    return 1
+  fi
+
+  if [ "${#pkgs[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo -e "${BLUE}======================================${NC}"
+  echo -e "${BOLD}Installing ${label}:${NC}"
+  for pkg in "${pkgs[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo -e "${BLUE}======================================${NC}\n"
+
+  sudo apt update
+  sudo apt install -y "${pkgs[@]}"
+
+  print_success "${label} installation finished"
+}
+
+# Install packages using npm (Node.js)
+install_npm_packages() {
+  local label="$1"
+  shift
+  local pkgs=("$@")
+
+  if ! command -v npm >/dev/null 2>&1; then
+    echo -e "${BLUE}ℹ${NC} npm not installed, skipping npm packages installation"
+    echo -e "${BLUE}ℹ${NC} Install npm first if you need these packages: ${pkgs[*]}"
+    return 0
+  fi
+
+  if [ "${#pkgs[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo -e "${BLUE}======================================${NC}"
+  echo -e "${BOLD}Installing ${label}:${NC}"
+  for pkg in "${pkgs[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo -e "${BLUE}======================================${NC}\n"
+
+  local pkgs_to_install=()
+  for pkg in "${pkgs[@]}"; do
+    if ! npm list -g --depth=0 "$pkg" >/dev/null 2>&1; then
+      pkgs_to_install+=("$pkg")
+    else
+      echo -e "${GREEN}${pkg} is already installed, skipping.${NC}"
+    fi
+  done
+
+  if [ ${#pkgs_to_install[@]} -eq 0 ]; then
+    print_success "All ${label} are already installed"
+    return 0
+  fi
+
+  echo -e "\n${BOLD}Installing missing packages:${NC}"
+  for pkg in "${pkgs_to_install[@]}"; do
+    echo -e "  ${BLUE}->${NC} $pkg"
+  done
+  echo ""
+
+  sudo npm install -g "${pkgs_to_install[@]}"
+
+  print_success "${label} installation finished"
+}
+
+# ============================================================================
+# System Configuration Functions
+# ============================================================================
+
+# Add user to a group safely
+add_user_to_group() {
+  local username="$1"
+  local groupname="$2"
+
+  if ! id -nG "$username" | grep -qw "$groupname"; then
+    sudo usermod -aG "$groupname" "$username"
+    echo -e "${BLUE}→ Added $username to $groupname group. Log out and log back in for this to take effect.${NC}"
+  else
+    echo -e "${BLUE}→ $username is already in $groupname group.${NC}"
+  fi
+}
+
+# Check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Enable and start a systemd service (user or system)
+enable_service() {
+  local service="$1"
+  local user_service="${2:-false}"
+
+  if [ "$user_service" = "true" ]; then
+    systemctl --user daemon-reload
+    systemctl --user enable --now "$service"
+  else
+    sudo systemctl enable --now "$service"
+  fi
+}
+
+# Check if running on a specific OS
+is_os() {
+  local os="$1"
+  [ "{{ .os }}" = "$os" ]
+}
+
+# ============================================================================
+# Validation Functions
+# ============================================================================
+
+# Confirm action with user
+confirm() {
+  local prompt="$1"
+  local response
+
+  read -p "$prompt [y/N] " -r response
+  [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
+}
+
+# Require a command to be installed
+require_command() {
+  local cmd="$1"
+  local install_msg="$2"
+
+  if ! command_exists "$cmd"; then
+    print_error "$cmd not found"
+    if [ -n "$install_msg" ]; then
+      echo -e "${YELLOW}Please install it: $install_msg${NC}"
+    fi
+    return 1
+  fi
+}
+
+# ============================================================================
+# File Functions
+# ============================================================================
+
+# Check if file exists
+file_exists() {
+  [ -f "$1" ]
+}
+
+# Check if directory exists
+dir_exists() {
+  [ -d "$1" ]
+}
+
+# Create directory if it doesn't exist
+mkdir_safe() {
+  mkdir -p "$1"
+}
+
+# ============================================================================
+# Error Handling
+# ============================================================================
+
+# Exit with error message
+die() {
+  print_error "$1"
+  exit 1
+}

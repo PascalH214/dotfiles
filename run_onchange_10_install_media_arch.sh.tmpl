@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
+
+{{ if and (eq .os "arch-linux") .install_media_related_pkgs -}}
+
+print_section "Installing Media Packages (Arch Linux)"
+
+install_yay_packages "Media related packages" {{ range .pkgs_media }}{{ . | quote }} {{ end }}
+
+print_success "Media packages installed"
+
+{{ end -}}

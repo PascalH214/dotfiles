@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
+
+{{ if and (eq .os "debian") .install_hyprland -}}
+
+print_section "Installing Hyprland Packages (Debian)"
+
+install_apt_packages "Hyprland and related" {{ range .pkgs_hyprland }}{{ . | quote }} {{ end }}
+
+print_success "Hyprland packages installed"
+
+{{ end -}}

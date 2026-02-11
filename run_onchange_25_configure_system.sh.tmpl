@@ -1,110 +1,84 @@
 #!/bin/bash
 
-# Define colors
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-BOLD='\033[1m'
-RED='\033[0;31m'
-NC='\033[0m'
-
-print_begin() {
-  local label="$1"
-
-  echo -e "${BLUE}======================================${NC}"
-  # Using the dynamic label here
-  echo -e "${BOLD}Configure ${label}:${NC}"
-  for pkg in "${pkgs[@]}"; do
-    echo -e "  ${BLUE}->${NC} $pkg"
-  done
-  echo -e "${BLUE}======================================${NC}\n"
-}
-
-print_end() {
-  echo -e "\n${GREEN}✓ Configure ${label} finished${NC}\n"
-}
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
 
 {{ if or (eq .os "arch-linux") (eq .os "debian") -}}
 
 {{- if and (eq .os "arch-linux") .install_ly }}
-print_begin "ly (display-manager)"
+print_section "ly (display-manager)"
 
 sudo systemctl enable ly@tty2.service
 
-print_end "ly (display-manager)"
+print_success "ly (display-manager) configured"
 {{- end }}
 
 {{ if .install_kde_apps }}
-print_begin "kde file associations"
+print_section "kde file associations"
 
 sudo update-desktop-database
 kbuildsycoca6 --noincremental
 
-print_end "kde file associations"
+print_success "kde file associations configured"
 {{- end }}
 
-print_begin "docker"
+print_section "docker"
 
 if ! getent group docker >/dev/null; then
   sudo groupadd docker
-  info "Created docker group."
+  print_info "Created docker group."
 else
-  echo "Docker group already exists."
+  print_info "Docker group already exists."
 fi
 
-if ! id -nG "$USER" | grep -qw docker; then
-  sudo usermod -aG docker "$USER"
-  info "Added $USER to docker group. You may need to log out and log back in for this to take effect."
-else
-  echo "User $USER is already in the docker group."
-fi
+add_user_to_group "$USER" docker
 
 sudo systemctl enable --now docker
 
-print_end "docker"
+print_success "docker configured"
 
 {{ if eq .os "arch-linux" -}}
-print_begin "openrazer-daemon"
+print_section "openrazer-daemon"
 
-sudo gpasswd -a $USER openrazer
+sudo gpasswd -a "$USER" openrazer
 
-print_end "openrazer-daemon"
+print_success "openrazer-daemon configured"
 {{- end }}
 
-print_begin "bluetooth"
+print_section "bluetooth"
 
 sudo systemctl enable --now bluetooth
 
-print_end "bluetooth"
+print_success "bluetooth configured"
 
-print_begin "SSH Agent (systemd user service)"
+print_section "SSH Agent (systemd user service)"
 
 systemctl --user daemon-reload
 systemctl --user enable ssh-agent.service
 systemctl --user start ssh-agent.service
 
-print_end "SSH Agent (systemd user service)"
+print_success "SSH Agent configured"
 
-print_begin "Syncthing"
+print_section "Syncthing"
 
 systemctl --user daemon-reload
 systemctl --user enable --now syncthing.service
 
-print_end "Syncthing"
+print_success "Syncthing configured"
 {{- if and (eq .os "arch-linux") .install_timeshift }}
-print_begin "grub-btrfsd & teimshift-autosnap"
+print_section "grub-btrfsd & timeshift-autosnap"
 
 sudo /etc/grub.d/41_snapshots-btrfs
 
 unit_path=$(systemctl show -p FragmentPath grub-btrfsd | cut -d= -f2)
 if [ -z "$unit_path" ]; then
-  error "Could not find unit path for grub-btrfsd."
+  die "Could not find unit path for grub-btrfsd."
 fi
 
 sudo sed -i 's|^ExecStart=.*|ExecStart=/usr/bin/grub-btrfsd --syslog --timeshift-auto|' "$unit_path"
 sudo systemctl daemon-reload
 sudo systemctl enable --now grub-btrfsd
 
-print_end "grub-btrfsd & teimshift-autosnap"
+print_success "grub-btrfsd & timeshift-autosnap configured"
 {{- end }}
 
 {{- end }}

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
+
+{{ if and (eq .os "arch-linux") .install_virtualbox -}}
+
+print_section "Installing VirtualBox Packages (Arch Linux)"
+
+install_yay_packages "VirtualBox and Host Modules" {{ range .pkgs_virtualbox }}{{ . | quote }} {{ end }}
+
+print_success "VirtualBox packages installed"
+
+{{ end -}}

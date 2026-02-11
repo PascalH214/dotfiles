@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
+
+{{ if and (eq .os "arch-linux") .install_kde_apps -}}
+
+print_section "Installing KDE Packages (Arch Linux)"
+
+install_yay_packages "KDE-Apps" {{ range .pkgs_kde }}{{ . | quote }} {{ end }}
+
+print_success "KDE packages installed"
+
+{{ end -}}

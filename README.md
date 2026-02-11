@@ -77,9 +77,15 @@ chezmoi apply
 
 ```plaintext
 .
-├── ansible_playbooks/          # Ansible playbooks for system configuration
-│   ├── ansible_timezone.yml     # Timezone configuration
-│   └── ansible_iwd.yml          # iwd daemon configuration
+├── lib/                         # Shared libraries and utilities
+│   └── common.sh.tmpl           # Common functions for all scripts
+├── ansible_playbooks/           # Ansible playbooks for system configuration
+│   ├── grub_windows.yml         # GRUB Windows entry configuration
+│   ├── iwd.yml                  # iwd wireless daemon configuration
+│   ├── ly_config.yml            # ly display manager configuration
+│   ├── multilib.yml             # Multilib repository enablement
+│   ├── power_management.yml     # Suspend/hibernate configuration
+│   └── timezone.yml             # Timezone configuration
 ├── dot_config/                  # Application configurations
 │   ├── hypr/                    # Hyprland window manager
 │   ├── nvim/                    # Neovim editor configuration
@@ -87,34 +93,80 @@ chezmoi apply
 │   ├── tmux/                    # Tmux terminal multiplexer
 │   ├── rofi/                    # Application launcher
 │   ├── waybar/                  # Status bar
-│   ├── yazi/                    # File manager
+│   ├── yazi/                    # Terminal file manager
 │   ├── fastfetch/               # System information display
+│   ├── lsd/                     # lsd ls replacement
 │   └── other/                   # Additional configurations
 ├── dot_wallpaper/               # Wallpaper files
 ├── dot_bash*                    # Bash configuration files
 ├── dot_gitconfig.tmpl           # Git configuration template
 ├── run_onchange_*.sh.tmpl       # Automated setup scripts
-└── ansible_iwd.yml              # Ansible playbook
+└── run_25_configure_ansible.sh.tmpl # Ansible playbooks runner
 
 ```
 
 ## Automated Setup Scripts
 
-Setup scripts run automatically when their source files change:
+Setup scripts run automatically when their source files change. All scripts source the shared library (`lib/common.sh.tmpl`) for common functions.
 
-- `run_onchange_00_print_info.sh.tmpl` - Display system information
-- `run_onchange_05_install_yay.sh.tmpl` - Install yay package manager (Arch)
-- `run_onchange_10_install_packages_arch.sh.tmpl` - Install Arch packages
-- `run_onchange_10_install_packages_ubuntu.sh.tmpl` - Install Ubuntu packages
-- `run_onchange_15_install_packages_npm.sh.tmpl` - Install NPM packages
-- `run_onchange_20_bitwarden.sh.tmpl` - Bitwarden CLI setup
-- `run_onchange_22_install_amd_drivers_arch.sh.tmpl` - GPU drivers installation (AMD, NVIDIA, Intel)
-- `run_onchange_25_configure_ansible.sh.tmpl` - Run all Ansible playbooks
-- `run_onchange_25_configure_arch.sh.tmpl` - Arch Linux specific configuration
-- `run_onchange_27_install_printers_scanners_arch.sh.tmpl` - CUPS and SANE installation
-- `run_onchange_28_configure_printers_scanners_arch.sh.tmpl` - Printers and scanners configuration
-- `run_onchange_28_install_gaming_arch.sh.tmpl` - Gaming setup and optimizations
+### Initialization
+- `run_onchange_00_print_info.sh.tmpl` - Display system information and confirm setup
+- `run_onchange_05_install_yay.sh.tmpl` - Install yay package manager (Arch only)
+
+### Modular Package Installation (run_onchange_10_*)
+Scripts are modular to enable independent feature management:
+
+**Base Packages** (always run):
+- `run_onchange_10_install_base_packages_arch.sh.tmpl` - CLI, TUI, Dev, GUI tools (Arch)
+- `run_onchange_10_install_base_packages_debian.sh.tmpl` - CLI, TUI, Dev, GUI tools (Debian)
+
+**Optional Packages** (conditional on `.chezmoi.toml` flags):
+- `run_onchange_10_install_hyprland_arch.sh.tmpl` - Hyprland WM packages (.install_hyprland)
+- `run_onchange_10_install_hyprland_debian.sh.tmpl` - Hyprland WM packages (.install_hyprland)
+- `run_onchange_10_install_kde_arch.sh.tmpl` - KDE applications (.install_kde_apps)
+- `run_onchange_10_install_kde_debian.sh.tmpl` - KDE applications (.install_kde_apps)
+- `run_onchange_10_install_media_arch.sh.tmpl` - Media tools (.install_media_related_pkgs)
+- `run_onchange_10_install_media_debian.sh.tmpl` - Media tools (.install_media_related_pkgs)
+- `run_onchange_10_install_timeshift_arch.sh.tmpl` - Timeshift backup (.install_timeshift)
+- `run_onchange_10_install_timeshift_debian.sh.tmpl` - Timeshift backup (.install_timeshift)
+- `run_onchange_10_install_virtualbox_arch.sh.tmpl` - VirtualBox packages (.install_virtualbox)
+- `run_onchange_10_install_gaming_arch.sh.tmpl` - Gaming tools and optimizations (.install_gaming)
+
+### Additional Setup
+- `run_onchange_15_install_packages_npm.sh.tmpl` - Install NPM packages globally
+- `run_onchange_20_bitwarden.sh.tmpl` - Bitwarden CLI setup for SSH keys
+- `run_onchange_22_install_gpu_drivers.sh.tmpl` - GPU drivers (AMD, NVIDIA, Intel)
+- `run_onchange_25_configure_system.sh.tmpl` - System configuration (Docker, Bluetooth, SSH, etc.)
+- `run_onchange_25_configure_ansible.sh.tmpl` - Run Ansible playbooks
+- `run_onchange_27_install_printers_scanners.sh.tmpl` - CUPS and SANE installation
+- `run_onchange_28_configure_printers_scanners.sh.tmpl` - Printers and scanners service setup
 - `run_onchange_30_code_extensions.sh.tmpl` - Install VS Code extensions
+- `run_onchange_35_configure_virtualbox.sh.tmpl` - VirtualBox kernel modules and group setup
+
+## Shared Library
+
+The `lib/common.sh.tmpl` file contains reusable functions used by all setup scripts:
+
+**Output Functions**:
+- `print_section(label)` - Print formatted section headers
+- `print_success(message)` - Print success messages with checkmark
+- `print_info(message)` - Print information messages
+- `print_warning(message)` - Print warning messages
+- `print_error(message)` - Print error messages to stderr
+
+**Package Installation**:
+- `install_yay_packages(label, packages...)` - Install packages via yay (Arch)
+- `install_apt_packages(label, packages...)` - Install packages via apt (Debian)
+- `install_npm_packages(label, packages...)` - Install global NPM packages
+
+**System Utilities**:
+- `add_user_to_group(username, groupname)` - Safely add user to group
+- `command_exists(command)` - Check if command is available
+- `enable_service(service, [user_service])` - Enable and start systemd services
+- `confirm(prompt)` - Prompt user for yes/no confirmation
+- `require_command(cmd, [install_msg])` - Require command or fail
+- `mkdir_safe(path)` - Create directory recursively
+- `die(message)` - Exit with error message
 
 ## Configuration Files
 

@@ -1,30 +1,6 @@
 #!/bin/bash
 
-# Define colors
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-BOLD='\033[1m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-print_section() {
-  echo -e "${BLUE}======================================${NC}"
-  echo -e "${BOLD}$1${NC}"
-  echo -e "${BLUE}======================================${NC}\n"
-}
-
-print_success() {
-  echo -e "${GREEN}✓ $1${NC}\n"
-}
-
-print_info() {
-  echo -e "${BLUE}ℹ $1${NC}"
-}
-
-print_warning() {
-  echo -e "${YELLOW}⚠ $1${NC}"
-}
+source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
 
 {{ if or (eq .os "arch-linux") (eq .os "debian") -}}
 
@@ -34,15 +10,13 @@ print_section "GPU Drivers Installation"
 
 {{ if eq .os "arch-linux" -}}
 # Check if yay is available
-if ! command -v yay >/dev/null 2>&1; then
-  echo -e "${RED}error:${NC} yay not installed" >&2
-  exit 1
+if ! command_exists yay; then
+  die "yay not installed"
 fi
 {{- else if eq .os "debian" -}}
 # Check if apt is available
-if ! command -v apt >/dev/null 2>&1; then
-  echo -e "${RED}error:${NC} apt not installed" >&2
-  exit 1
+if ! command_exists apt; then
+  die "apt not installed"
 fi
 {{- end }}
 
