@@ -4,6 +4,12 @@ source "{{ .chezmoi.sourceDir }}/lib/common.sh.tmpl"
 
 {{ if or (eq .os "arch-linux") (eq .os "debian") -}}
 
+{{- if eq .os "arch-linux" }}
+
+sudo systemctl enable --now upower.service
+
+{{- end }}
+
 {{- if and (eq .os "arch-linux") .install_ly }}
 print_section "ly (display-manager)"
 
