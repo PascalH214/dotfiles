@@ -42,6 +42,7 @@
       "custom/spacer4",
       // "custom/weather",
       "clock",
+      "custom/uptime",
       "custom/weather",
     ],
 
@@ -153,6 +154,13 @@
         }
       },
       "on-click": "chromium --app=https://calendar.google.com"
+    },
+
+    "custom/uptime": {
+      "interval": 15,
+      "exec": "uptime -p | sed 's/^up //'",
+      "format": " {}",
+      "tooltip": false
     },
 
     "cpu": {

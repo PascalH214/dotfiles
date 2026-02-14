@@ -121,7 +121,8 @@
 #waybar.main #temperature,
 #waybar.main #traym,
 #waybar.main #window,
-#waybar.main #disk {
+#waybar.main #disk,
+#waybar.main #custom-uptime {
   padding-left: 8pt;
   padding-right: 8pt;
   background: @module_bg;
@@ -174,7 +175,8 @@
 }
 
 #waybar.main #custom-weather,
-#waybar.main #clock {
+#waybar.main #clock,
+#waybar.main #custom-uptime {
   color: @date;
   background: @background2;
 }
