@@ -10,6 +10,11 @@ install_yay_packages "CLI Tools" {{ range .pkgs_cli }}{{ . | quote }} {{ end }}
 install_yay_packages "TUI Applications" {{ range .pkgs_tui }}{{ . | quote }} {{ end }}
 install_yay_packages "Dev Tools" {{ range .pkgs_dev }}{{ . | quote }} {{ end }}
 
+print_section "Install ble.sh"
+
+git clone --recursive --depth 1 --shallow-submodules https://github.com/akinomyoga/ble.sh.git
+make -C ble.sh install PREFIX=~/.local
+
 {{ if not .headless -}}
 install_yay_packages "GUI Applications" {{ range .pkgs_gui }}{{ . | quote }} {{ end }}
 install_yay_packages "Fonts" {{ range .pkgs_fonts }}{{ . | quote }} {{ end }}
