@@ -4,6 +4,7 @@ require("oil").setup()
 
 vim.lsp.enable('pyright')
 vim.lsp.enable('bashls')
+vim.lsp.enable('vtsls')
 vim.lsp.enable('terraformls')
 vim.lsp.enable('yamlls')
 vim.lsp.enable('ansiblels')
