@@ -8,6 +8,7 @@ vim.lsp.enable('terraformls')
 vim.lsp.enable('yamlls')
 vim.lsp.enable('ansiblels')
 vim.lsp.enable('ast_grep')
+vim.lsp.enable('eslint')
 
 vim.opt.number = true
 vim.opt.relativenumber = true

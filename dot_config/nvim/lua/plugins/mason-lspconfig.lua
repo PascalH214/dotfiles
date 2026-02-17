@@ -14,7 +14,8 @@ return {
 					"yamlls",
           "ansiblels",
           "ast_grep",
-          "hyprls"
+          "hyprls",
+          "eslint"
 				},
 			}
 		end,
