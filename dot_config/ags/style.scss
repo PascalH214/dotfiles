@@ -1,0 +1,33 @@
+// https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gtk/theme/Adwaita/_colors-public.scss
+
+window.Bar {
+  background: transparent;
+  font-weight: bold;
+  padding: 8px 24px 0px 24px;
+
+  .workspaces {
+    background-color: rgb(30, 30, 46);
+
+    padding: 4px 12px;
+    border-radius: 16px;
+
+    font-size: large;
+    color: rgb(180, 190, 254);
+
+    button {
+      min-width: 30px;
+      min-height: 30px;
+
+      margin: 0 2px 0 2px;
+      padding: 0px;
+
+      background: rgba(30, 30, 46, 1);
+
+      border-radius: 9999px;
+
+      &:hover {
+        background: rgb(108, 112, 134, 0.2);
+      }
+    }
+  }
+}
