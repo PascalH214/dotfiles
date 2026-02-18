@@ -4,7 +4,10 @@ $base-color: rgb(30, 30, 46);
 $surface-color-0: rgb(49, 50, 68);
 $overlay-color-0: rgb(108, 112, 134);
 
-$lavender: rgb(180, 190, 254);
+$flamingo-color: rgb(242, 205, 205);
+$pink-color: rgb(245, 194, 231);
+$mauve-color: rgb(203, 166, 247);
+$lavender-color: rgb(180, 190, 254);
 
 $button-width: 48px;
 $button-height: 16px;
@@ -16,15 +19,17 @@ window.Bar {
 
   font-weight: bold;
 
-  .workspaces {
+  .workspaces, .info-center {
     background-color: $base-color;
 
     padding: 6px 12px;
     border-radius: 8px;
 
-    font-size: large;
-    color: $lavender;
+    font-size: larger;
+    color: $lavender-color;
+  }
 
+  .workspaces {
     button {
       min-width: $button-width;
       min-height: $button-height;
@@ -42,6 +47,32 @@ window.Bar {
 
       &.focused {
         background-color: $surface-color-0;
+      }
+    }
+  }
+
+  .info-center {
+    .time-info {
+      .time-label {
+        margin: 0px 12px;
+
+        image {
+          margin-right: 8px;
+        }
+      }
+      .time-label-spacing {
+        background-color: $surface-color-0;
+        min-width: 2px;
+      }
+      .time {
+        color: $flamingo-color;
+      }
+      .date {
+
+        color: $pink-color;
+      }
+      .uptime {
+        color: $mauve-color;
       }
     }
   }

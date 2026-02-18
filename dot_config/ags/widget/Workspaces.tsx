@@ -1,12 +1,11 @@
-import { Gtk } from "ags/gtk4"
-
 import Hyprland from "gi://AstalHyprland"
 import { createBinding, createEffect, createState, For } from "gnim"
+import { Gtk } from "ags/gtk4"
 import GObject from "gnim/gobject"
 
 const hyprland = Hyprland.get_default()
 
-export default function Workspaces() {
+export default function Workspaces(props: Partial<Gtk.Box.ConstructorProps> = {}) {
   const workspacesProperty = createBinding(hyprland, "workspaces")
   const focusedWorkspaceId = createBinding(hyprland, "focused_workspace", "id")
 
@@ -24,7 +23,7 @@ export default function Workspaces() {
         <button
           class={id == focusedWorkspaceId() ? "focused" : ""}
           label={idStr == "10" ? "0" : idStr}
-          onClicked={() => workspace.focus()}
+          onClicked={() => id != focusedWorkspaceId() && workspace.focus()}
         />
       )
     })
@@ -34,8 +33,9 @@ export default function Workspaces() {
 
   return (
     <box
+      $type="center"
+      {...props}
       class="workspaces"
-      halign={Gtk.Align.CENTER}
       hexpand={false}
     >
       <For each={buttons}>
