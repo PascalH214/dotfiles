@@ -9,7 +9,7 @@ window.Bar {
     background-color: rgb(30, 30, 46);
 
     padding: 4px 12px;
-    border-radius: 16px;
+    border-radius: 8px;
 
     font-size: large;
     color: rgb(180, 190, 254);
@@ -21,12 +21,16 @@ window.Bar {
       margin: 0 2px 0 2px;
       padding: 0px;
 
-      background: rgba(30, 30, 46, 1);
+      background-color: rgba(30, 30, 46, 1);
 
       border-radius: 9999px;
 
       &:hover {
-        background: rgb(108, 112, 134, 0.2);
+        background-color: rgb(108, 112, 134, 0.2);
+      }
+
+      &.focused {
+        background-color: rgb(49, 50, 68);
       }
     }
   }
