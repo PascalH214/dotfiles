@@ -3,6 +3,7 @@ import { Astal, Gdk } from "ags/gtk4"
 
 import Workspaces from "./Workspaces"
 import InfoCenter from "./InfoCenter"
+import HwInfo from "./HwInfo"
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
@@ -18,6 +19,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       application={app}
     >
       <centerbox>
+        <HwInfo />
         <Workspaces />
         <InfoCenter />
       </centerbox>
