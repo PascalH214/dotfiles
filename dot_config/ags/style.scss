@@ -1,36 +1,47 @@
 // https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gtk/theme/Adwaita/_colors-public.scss
 
+$base-color: rgb(30, 30, 46);
+$surface-color-0: rgb(49, 50, 68);
+$overlay-color-0: rgb(108, 112, 134);
+
+$lavender: rgb(180, 190, 254);
+
+$button-width: 48px;
+$button-height: 16px;
+
 window.Bar {
   background: transparent;
-  font-weight: bold;
+
   padding: 8px 24px 0px 24px;
 
-  .workspaces {
-    background-color: rgb(30, 30, 46);
+  font-weight: bold;
 
-    padding: 4px 12px;
+  .workspaces {
+    background-color: $base-color;
+
+    padding: 6px 12px;
     border-radius: 8px;
 
     font-size: large;
-    color: rgb(180, 190, 254);
+    color: $lavender;
 
     button {
-      min-width: 30px;
-      min-height: 30px;
+      min-width: $button-width;
+      min-height: $button-height;
 
       margin: 0 2px 0 2px;
       padding: 0px;
 
-      background-color: rgba(30, 30, 46, 1);
+      background-color: $base-color;
 
-      border-radius: 9999px;
+      border-radius: $button-height;
 
       &:hover {
-        background-color: rgb(108, 112, 134, 0.2);
+        background-color: $overlay-color-0;
       }
 
       &.focused {
-        background-color: rgb(49, 50, 68);
+        background-color: $surface-color-0;
       }
     }
   }
