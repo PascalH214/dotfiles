@@ -2,26 +2,7 @@ import { Gtk } from "ags/gtk4"
 import { createPoll } from "ags/time";
 import { createState, createEffect, type Accessor } from "gnim"
 
-interface TimeLabelProps {
-  className?: string
-  imagePath?: string;
-  time: Accessor<string> | string;
-}
-
-function TimeLabel({ className, imagePath, time }: TimeLabelProps) {
-  return (
-    <box class={"time-label " + className }>
-      {imagePath != undefined ? <image file={`./images/${imagePath}`} /> : null}
-      <label label={time} />
-    </box>
-  )
-}
-
-function TimeLabelSpacing() {
-  return (
-    <box class="time-label-spacing" />
-  )
-}
+import TimeIconLabel, { TimeIconLabelDividingLine } from "./TimeIconLabel";
 
 export default function InfoCenter(props: Partial<Gtk.Box.ConstructorProps> = {}) {
   const uptimeState = createPoll("", 20000, `bash -c "uptime | awk '{print $3}' | cut -d, -f1"`);
@@ -64,11 +45,11 @@ export default function InfoCenter(props: Partial<Gtk.Box.ConstructorProps> = {}
       {...props}
     >
       <box class="time-info">
-        <TimeLabel className="time" imagePath="clock.svg" time={time} />
-        <TimeLabelSpacing />
-        <TimeLabel className="date" imagePath="calendar.svg" time={date} />
-        <TimeLabelSpacing />
-        <TimeLabel className="uptime" imagePath="stopwatch.svg" time={uptime} />
+        <TimeIconLabel className="time" imageName="clock" time={time} />
+        <TimeIconLabelDividingLine />
+        <TimeIconLabel className="date" imageName="calendar" time={date} />
+        <TimeIconLabelDividingLine />
+        <TimeIconLabel className="uptime" imageName="stopwatch" time={uptime} />
       </box>
     </box>
   )
