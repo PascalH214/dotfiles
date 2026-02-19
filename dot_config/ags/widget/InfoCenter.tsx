@@ -2,7 +2,8 @@ import { Gtk } from "ags/gtk4"
 import { createPoll } from "ags/time";
 import { createState, createEffect, type Accessor } from "gnim"
 
-import TimeIconLabel, { TimeIconLabelDividingLine } from "./TimeIconLabel";
+import LabelWithIcon from "./LabelWithIcon";
+import DividingLine from "./DividingLine";
 
 export default function InfoCenter(props: Partial<Gtk.Box.ConstructorProps> = {}) {
   const uptimeState = createPoll("", 20000, `bash -c "uptime | awk '{print $3}' | cut -d, -f1"`);
@@ -45,11 +46,11 @@ export default function InfoCenter(props: Partial<Gtk.Box.ConstructorProps> = {}
       {...props}
     >
       <box class="time-info">
-        <TimeIconLabel className="time" imageName="clock" time={time} />
-        <TimeIconLabelDividingLine />
-        <TimeIconLabel className="date" imageName="calendar" time={date} />
-        <TimeIconLabelDividingLine />
-        <TimeIconLabel className="uptime" imageName="stopwatch" time={uptime} />
+        <LabelWithIcon className="time" imageName="clock" label={time} />
+        <DividingLine />
+        <LabelWithIcon className="date" imageName="calendar" label={date} />
+        <DividingLine />
+        <LabelWithIcon className="uptime" imageName="stopwatch" label={uptime} />
       </box>
     </box>
   )

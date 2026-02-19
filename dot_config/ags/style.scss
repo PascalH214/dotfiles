@@ -56,13 +56,6 @@ window.Bar {
 
   .info-center {
     .time-info {
-      .time-label {
-        margin: 0px 12px;
-
-        image {
-          margin-right: 8px;
-        }
-      }
       .time-label-spacing {
         background-color: $surface-color-0;
         min-width: 2px;
@@ -77,6 +70,14 @@ window.Bar {
       .uptime {
         color: $mauve-color;
       }
+    }
+  }
+
+  .icon-label {
+    margin: 0px 12px;
+
+    image {
+      margin-right: 8px;
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Gtk } from "ags/gtk4"
 import { createPoll } from "ags/time"
-import IconWithState from "./IconWithState"
 import { createComputed } from "gnim"
+import LabelWithStateIcon from "./LabelWithStateIcon"
 
 const cpuCmd = `env -u BASH_ENV bash --noprofile --norc -c '
 read cpu u n s i iw ir sir st g gn < /proc/stat
@@ -35,8 +35,11 @@ export default function HwInfo(props: Partial<Gtk.Box.ConstructorProps> = {}) {
 
   return (
     <box name="hw-info" class="hw-info" $type="start" {...props}>
-      <IconWithState state={cpuUsageState} imageGroup="cpu" pixelSize={20} />
-      <label label={cpuUsage((v) => `${v}%`)} />
+      <LabelWithStateIcon
+        state={cpuUsageState()}
+        imageGroup="cpu"
+        text={cpuUsage((v) => `${v}%`)}
+      />
     </box>
   )
 }
