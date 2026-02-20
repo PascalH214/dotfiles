@@ -1,5 +1,5 @@
 export default function DividingLine() {
   return (
-    <box class="time-label-spacing" />
+    <box class="dividing-line" />
   )
 }

@@ -29,9 +29,6 @@ window.Bar {
     color: $lavender-color;
   }
 
-  .hw-info {
-  }
-
   .workspaces {
     button {
       min-width: $button-width;
@@ -56,10 +53,6 @@ window.Bar {
 
   .info-center {
     .time-info {
-      .time-label-spacing {
-        background-color: $surface-color-0;
-        min-width: 2px;
-      }
       .time {
         color: $flamingo-color;
       }
@@ -71,6 +64,11 @@ window.Bar {
         color: $mauve-color;
       }
     }
+  }
+
+  .dividing-line {
+    background-color: $surface-color-0;
+    min-width: 2px;
   }
 
   .icon-label {

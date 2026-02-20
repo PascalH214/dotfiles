@@ -1,7 +1,10 @@
 import { Gtk } from "ags/gtk4"
 import { createPoll } from "ags/time"
 import { createComputed } from "gnim"
+
 import LabelWithStateIcon from "./LabelWithStateIcon"
+import KeyboardLayout from "./KeyboardLayout"
+import DividingLine from "./DividingLine"
 
 const cpuCmd = `env -u BASH_ENV bash --noprofile --norc -c '
 read cpu u n s i iw ir sir st g gn < /proc/stat
@@ -35,6 +38,8 @@ export default function HwInfo(props: Partial<Gtk.Box.ConstructorProps> = {}) {
 
   return (
     <box name="hw-info" class="hw-info" $type="start" {...props}>
+      <KeyboardLayout />
+      <DividingLine />
       <LabelWithStateIcon
         state={cpuUsageState()}
         imageGroup="cpu"
