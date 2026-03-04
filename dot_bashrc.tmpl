@@ -30,8 +30,10 @@ exercism () {
     printf '%s\n' "${out[@]}"
     if [[ $1 == "download" && -d "${out[-1]}" ]]; then
         cd "${out[-1]}"
-        code .
-        return 1
+    fi
+
+    if [[ $2 == "--track=kotlin" ]]; then
+        nohup intellij-idea-ultimate-edition . >/dev/null 2>&1 &
     fi
 }
 {{ end }}
