@@ -1,44 +1,27 @@
-require("config.lazy")
-require("Comment").setup()
-require("oil").setup()
+-- This file simply bootstraps the installation of Lazy.nvim and then calls other files for execution
+-- This file doesn't necessarily need to be touched, BE CAUTIOUS editing this file and proceed at your own risk.
+local lazypath = vim.env.LAZY or vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
 
-vim.lsp.enable('pyright')
-vim.lsp.enable('bashls')
-vim.lsp.enable('vtsls')
-vim.lsp.enable('terraformls')
-vim.lsp.enable('yamlls')
-vim.lsp.enable('ansiblels')
-vim.lsp.enable('ast_grep')
-vim.lsp.enable('eslint')
+if not (vim.env.LAZY or (vim.uv or vim.loop).fs_stat(lazypath)) then
+  -- stylua: ignore
+  local result = vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath })
+  if vim.v.shell_error ~= 0 then
+    -- stylua: ignore
+    vim.api.nvim_echo({ { ("Error cloning lazy.nvim:\n%s\n"):format(result), "ErrorMsg" }, { "Press any key to exit...", "MoreMsg" } }, true, {})
+    vim.fn.getchar()
+    vim.cmd.quit()
+  end
+end
 
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.shiftwidth = 2
-vim.opt.tabstop = 2
-vim.opt.expandtab = true
+vim.opt.rtp:prepend(lazypath)
 
-vim.cmd.colorscheme "catppuccin-mocha"
+-- validate that lazy is available
+if not pcall(require, "lazy") then
+  -- stylua: ignore
+  vim.api.nvim_echo({ { ("Unable to load lazy from: %s\n"):format(lazypath), "ErrorMsg" }, { "Press any key to exit...", "MoreMsg" } }, true, {})
+  vim.fn.getchar()
+  vim.cmd.quit()
+end
 
-vim.diagnostic.config({
-	virtual_text = {
-    severity = {
-			min = vim.diagnostic.severity.ERROR
-		},
-  },
-	virtual_lines = {
-		current_line = false,
-    severity = {
-			min = vim.diagnostic.severity.ERROR
-		},
-	},
-})
-
-vim.keymap.set("n", "<leader>d", function()
-  vim.diagnostic.open_float(0, {
-    scope = "line",
-    severity_sort = true,
-  })
-end, { desc = "Show diagnostics for current line" })
-
-vim.keymap.set('n', '<leader><Tab>', ':Oil<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>f', vim.diagnostic.open_float, { silent = true })
+require "lazy_setup"
+require "polish"
